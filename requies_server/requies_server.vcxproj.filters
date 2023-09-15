@@ -3,8 +3,20 @@
   <ItemGroup>
     <ClCompile Include="requiesServer.cpp" />
     <ClCompile Include="pch.cpp" />
+    <ClCompile Include="GameSession.cpp" />
+    <ClCompile Include="Player.cpp" />
+    <ClCompile Include="MapManager.cpp" />
+    <ClCompile Include="SessionManager.cpp" />
+    <ClCompile Include="PacketHandler.cpp" />
+    <ClCompile Include="Sector.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
+    <ClInclude Include="GameSession.h" />
+    <ClInclude Include="Player.h" />
+    <ClInclude Include="MapManager.h" />
+    <ClInclude Include="SessionManager.h" />
+    <ClInclude Include="PacketHandler.h" />
+    <ClInclude Include="Sector.h" />
   </ItemGroup>
 </Project>

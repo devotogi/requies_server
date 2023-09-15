@@ -15,12 +15,53 @@ struct PacketHeader
 	__int16 _pktSize = 0;
 };
 
+struct Vector3
+{
+	float x;
+	float y;
+	float z;
+
+	Vector3 operator*(float d)
+	{
+		return { x * d, y * d, z * d };
+	}
+
+	Vector3 operator+(Vector3 d)
+	{
+		return { x + d.x, y + d.y, z + d.z };
+	}
+};
+
 struct Quaternion
 {
 	float x;
 	float y;
 	float z;
 	float w;
+};
+
+struct BbBox
+{
+public:
+	__int16 _range;
+	unsigned __int16 maxX;
+	unsigned __int16 maxZ;
+	unsigned __int16 minX;
+	unsigned __int16 minZ;
+
+public:
+	BbBox(const Vector3& nowPos, int32 range) : _range(range)
+	{
+		UpdateBbBox(nowPos);
+	}
+
+	void UpdateBbBox(const Vector3& nowPos)
+	{
+		maxX = nowPos.x + _range >= 128 ? 127 : nowPos.x + _range;
+		maxZ = nowPos.z + _range >= 128 ? 127 : nowPos.z + _range;
+		minX = nowPos.x - _range < 0 ? 0 : nowPos.x - _range;
+		minZ = nowPos.z - _range < 0 ? 0 : nowPos.z - _range;
+	}
 };
 
 enum State : uint16
@@ -42,6 +83,31 @@ enum Dir : uint16
 	LEFTUP = 18,
 };
 
+enum MapItem : uint16
+{
+	MAP_Empty,
+	MAP_Player,
+};
+
+enum PacketProtocol : __int16
+{
+	C2S_PLAYERINIT,
+	S2C_PLAYERINIT,
+	C2S_PLAYERSYNC,
+	S2C_PLAYERSYNC,
+	S2C_PLAYERLIST,
+	S2C_PLAYERREMOVELIST,
+	S2C_PLAYERENTER,
+	S2C_PLAYEROUT,
+	C2S_LATENCY,
+	S2C_LATENCY,
+	C2S_MAPSYNC,
+	S2C_MAPSYNC,
+
+	S2C_PLAYERNEW,
+	S2C_PLAYERDESTORY,
+};
+
 struct Pos
 {
 public:
@@ -56,22 +122,5 @@ public:
 	bool operator!=(const Pos& other)
 	{
 		return !(*this == other);
-	}
-};
-
-struct Vector3
-{
-	float x;
-	float y;
-	float z;
-
-	Vector3 operator*(float d)
-	{
-		return { x * d, y * d, z * d };
-	}
-
-	Vector3 operator+(Vector3 d)
-	{
-		return { x + d.x, y + d.y, z + d.z };
 	}
 };
