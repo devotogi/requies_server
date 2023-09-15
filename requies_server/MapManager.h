@@ -40,6 +40,7 @@ public:
 	void ConvertSectorIndex(const Pos& pos, std::vector<Pos>& out);
 	void BroadCast(GameSession* session, BYTE* sendBuffer, int32 sendSize);
 	void Sync(GameSession* session, const Vector3& prevPos, const Vector3& nowPos);
+	void SyncProc(GameSession* session, const Vector3& prevPos, const Vector3& nowPos);
 	Vector3 GetStartPos(int32 x, int32 z) {
 		return _startPos
 			[z][x];

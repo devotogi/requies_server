@@ -61,6 +61,21 @@ public:
 	{
 		return !(*this == other);
 	}
+
+	bool operator<(const Pos& other) const
+	{
+		if (z != other.z)
+			return z < other.z;
+		return x < other.x;
+	}
+
+	bool operator>(const Pos& other) const
+	{
+		if (z != other.z)
+			return z > other.z;
+		return x > other.x;
+	}
+
 };
 
 struct PacketHeader

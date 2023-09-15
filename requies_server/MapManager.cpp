@@ -90,9 +90,52 @@ void MapManager::Sync(GameSession* session, const Vector3& prevPos, const Vector
 	if (prevMapIndex != nowMapIndex)
 	{
 		_map[prevMapIndex.z][prevMapIndex.x]->Reset(session);
-		Reset(session, prevPos);
+		// Reset(session, prevPos);
 		_map[nowMapIndex.z][nowMapIndex.x]->Set(session);
-		Set(session, nowPos);
+		// Set(session, nowPos);
+
+		SyncProc(session, prevPos, nowPos);
+	}
+}
+
+void MapManager::SyncProc(GameSession* session, const Vector3& prevPos, const Vector3& nowPos)
+{
+	std::vector<Pos> prevs;
+	ConvertSectorIndex(prevPos, prevs);
+	std::vector<Pos> nows;
+	ConvertSectorIndex(nowPos, nows);
+	
+	std::set<Pos> nowSet;
+	for (auto now : nows)
+		nowSet.insert(now);
+
+	std::set<Pos> prevSet;
+	for (auto prev : prevs)
+		prevSet.insert(prev);
+
+	std::vector<Pos>  remove;
+	std::vector<Pos>  adds;
+
+	for (auto prev : prevs) 
+	{
+		if (!nowSet.count(prev))
+			remove.push_back(prev);
+	}
+	
+	for (auto now : nows)
+	{
+		if (!prevSet.count(now))
+			adds.push_back(now);
+	}
+
+	for (auto item : remove)
+	{
+		_map[item.z][item.x]->SendRemoveList(session);
+	}
+
+	for (auto item : adds)
+	{
+		_map[item.z][item.x]->SendPlayerList(session);
 	}
 }
 
@@ -170,8 +213,8 @@ Pos MapManager::ConvertSectorIndex(const Vector3& pos)
 {
 	const int sectorSize = 32;
 
-	int posX = static_cast<int>(pos.x);
-	int posZ = static_cast<int>(pos.z);
+	int32 posX = static_cast<int>(pos.x);
+	int32 posZ = static_cast<int>(pos.z);
 
 	Pos sectorIndex = { posX / sectorSize ,posZ / sectorSize };
 
@@ -182,8 +225,8 @@ Pos MapManager::ConvertSectorIndex(const Pos& pos)
 {
 	const int sectorSize = 32;
 
-	int posX = static_cast<int>(pos.x);
-	int posZ = static_cast<int>(pos.z);
+	int32 posX = static_cast<int>(pos.x);
+	int32 posZ = static_cast<int>(pos.z);
 
 	Pos sectorIndex = { posX / sectorSize ,posZ / sectorSize };
 
@@ -194,7 +237,6 @@ Pos MapManager::ConvertSectorIndex(const Pos& pos)
 void MapManager::ConvertSectorIndex(const Vector3& pos, std::vector<Pos>& out)
 {
 	// 위, 오른위, 오른, 오른아래,아래,왼아래,왼,왼위
-
 	int32 dx[9] = { 0,0,1,1,1,0,-1,-1,-1 };
 	int32 dz[9] = { 0,-1,-1,0,1,1,1,0,-1 };
 	Pos here = ConvertSectorIndex(pos);
