@@ -2,7 +2,7 @@
 class ThreadManager
 {
 private:
-	static ThreadManager* _instance;
+	static ThreadManager*	_instance;
 	uint32					_threadId = 0;
 	std::vector<HANDLE>		_threads;
 	CRITICAL_SECTION		_cs;
@@ -22,9 +22,7 @@ public:
 
 	static ThreadManager* GetInstance()
 	{
-		if (_instance == nullptr)
-			_instance = new ThreadManager();
-
-		return _instance;
+		static ThreadManager instance;
+		return &instance;
 	}
 };

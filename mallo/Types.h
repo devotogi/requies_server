@@ -9,6 +9,60 @@ using uint32 = unsigned __int32;
 using uint64 = unsigned __int64;
 using wchar = wchar_t;
 
+enum State : uint16
+{
+	IDLE,
+	MOVE
+};
+
+enum Dir : uint16
+{
+	NONE = 0,
+	UP = 2,
+	RIGHT = 4,
+	DOWN = 8,
+	LEFT = 16,
+	UPRIGHT = 6,
+	RIGHTDOWN = 12,
+	LEFTDOWN = 24,
+	LEFTUP = 18,
+};
+
+enum PacketProtocol : __int16
+{
+	C2S_PLAYERINIT,
+	S2C_PLAYERINIT,
+	C2S_PLAYERSYNC,
+	S2C_PLAYERSYNC,
+	S2C_PLAYERLIST,
+	S2C_PLAYERREMOVELIST,
+	S2C_PLAYERENTER,
+	S2C_PLAYEROUT,
+	C2S_LATENCY,
+	S2C_LATENCY,
+	C2S_MAPSYNC,
+	S2C_MAPSYNC,
+	S2C_PLAYERNEW,
+	S2C_PLAYERDESTORY,
+};
+
+struct Pos
+{
+public:
+	int x;
+	int z;
+
+	bool operator==(const Pos& other)
+	{
+		return x == other.x && z == other.z;
+	}
+
+	bool operator!=(const Pos& other)
+	{
+		return !(*this == other);
+	}
+};
+
 struct PacketHeader
 {
 	__int16 _type = 0;
@@ -38,89 +92,4 @@ struct Quaternion
 	float y;
 	float z;
 	float w;
-};
-
-struct BbBox
-{
-public:
-	__int16 _range;
-	unsigned __int16 maxX;
-	unsigned __int16 maxZ;
-	unsigned __int16 minX;
-	unsigned __int16 minZ;
-
-public:
-	BbBox(const Vector3& nowPos, int32 range) : _range(range)
-	{
-		UpdateBbBox(nowPos);
-	}
-
-	void UpdateBbBox(const Vector3& nowPos)
-	{
-		maxX = nowPos.x + _range >= 128 ? 127 : nowPos.x + _range;
-		maxZ = nowPos.z + _range >= 128 ? 127 : nowPos.z + _range;
-		minX = nowPos.x - _range < 0 ? 0 : nowPos.x - _range;
-		minZ = nowPos.z - _range < 0 ? 0 : nowPos.z - _range;
-	}
-};
-
-enum State : uint16
-{
-	IDLE,
-	MOVE
-};
-
-enum Dir : uint16
-{
-	NONE = 0,
-	UP = 2,
-	RIGHT = 4,
-	DOWN = 8,
-	LEFT = 16,
-	UPRIGHT = 6,
-	RIGHTDOWN = 12,
-	LEFTDOWN = 24,
-	LEFTUP = 18,
-};
-
-enum MapItem : uint16
-{
-	MAP_Empty,
-	MAP_Player,
-};
-
-enum PacketProtocol : __int16
-{
-	C2S_PLAYERINIT,
-	S2C_PLAYERINIT,
-	C2S_PLAYERSYNC,
-	S2C_PLAYERSYNC,
-	S2C_PLAYERLIST,
-	S2C_PLAYERREMOVELIST,
-	S2C_PLAYERENTER,
-	S2C_PLAYEROUT,
-	C2S_LATENCY,
-	S2C_LATENCY,
-	C2S_MAPSYNC,
-	S2C_MAPSYNC,
-
-	S2C_PLAYERNEW,
-	S2C_PLAYERDESTORY,
-};
-
-struct Pos
-{
-public:
-	int x;
-	int z;
-
-	bool operator==(const Pos& other)
-	{
-		return x == other.x && z == other.z;
-	}
-
-	bool operator!=(const Pos& other)
-	{
-		return !(*this == other);
-	}
 };

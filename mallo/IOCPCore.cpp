@@ -25,8 +25,8 @@ void IOCPCore::RegisterIOCP(Session* session)
 
 void IOCPCore::Dispatch()
 {
-    DWORD           numOfBytes = 0;
-    LPOVERLAPPED    overlapped;
+    DWORD numOfBytes = 0;
+    LPOVERLAPPED overlapped;
     Session* session = nullptr;
 
     bool ret = GetQueuedCompletionStatus(_iocpHandle, &numOfBytes, reinterpret_cast<PULONG_PTR>(&session), &overlapped, INFINITE);
