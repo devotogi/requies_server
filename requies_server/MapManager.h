@@ -11,20 +11,11 @@ private:
 public:
 	MapManager();
 	~MapManager();
-	/*
+
 	static MapManager* GetInstance()
 	{
 		static MapManager	_instance;
 		return &_instance;
-	}
-	*/
-
-	static MapManager* GetInstance()
-	{
-		if (_instance == nullptr)
-			_instance = new MapManager();
-
-		return _instance;
 	}
 
 	void Set(GameSession* session);

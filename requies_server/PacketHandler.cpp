@@ -106,7 +106,6 @@ void PacketHandler::HandlePacket_C2S_MAPSYNC(GameSession* session, BYTE* packet,
 	br.Read(quaternion);
 
 	player->PlayerSync(vector3, state, dir, mouseDir, quaternion);
-
 	MapManager::GetInstance()->Sync(session, prevPos, vector3);
 	player->SetPrevPos(vector3);
 }

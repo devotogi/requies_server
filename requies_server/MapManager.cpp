@@ -49,31 +49,6 @@ MapManager::~MapManager()
 	}
 }
 
-// 0번 // 16,16
-// 1번 // 48,16
-// 2번 // 80,16
-// 3번 // 112,16
-// 4번 // 144,16
-// 5번 // 176,16
-// 6번 // 208,16
-// 7번 // 240,16
-// 8번 // 16,32
-// 9번 // 48,32
-// 10번 // 80,32
-// 11번 // 112,32
-// 12번 // 144,32
-// 13번 // 176,32
-// 14번 // 208,32
-// 15번 // 240,32
-// 16번 // 16,32
-// 17번 // 48,32
-// 18번 // 80,32
-// 19번 // 112,32
-// 20번 // 144,32
-// 21번 // 176,32
-// 22번 // 208,32
-// 23번 // 240,32
-
 void MapManager::BroadCast(GameSession* session, BYTE* sendBuffer, int32 sendSize)
 {
 	std::vector<Pos> adjacent;
@@ -90,9 +65,7 @@ void MapManager::Sync(GameSession* session, const Vector3& prevPos, const Vector
 	if (prevMapIndex != nowMapIndex)
 	{
 		_map[prevMapIndex.z][prevMapIndex.x]->Reset(session);
-		// Reset(session, prevPos);
 		_map[nowMapIndex.z][nowMapIndex.x]->Set(session);
-		// Set(session, nowPos);
 
 		SyncProc(session, prevPos, nowPos);
 	}
