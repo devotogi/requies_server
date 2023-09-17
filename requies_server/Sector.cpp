@@ -50,12 +50,20 @@ void Sector::SendPlayerList(GameSession* session)
 	BufferWriter bw(sendBuffer);
 	PacketHeader* pktHeader = bw.WriteReserve<PacketHeader>();
 
-	bw.Write(session->GetSessionID());
-	bw.Write((uint16)player->GetState());
-	bw.Write((uint16)player->GetDir());
-	bw.Write((uint16)player->GetMouseDir());
-	bw.Write(player->GetPos());
-	bw.Write(player->GetCameraLocalRotation());
+	int32 sessionId = session->GetSessionID();
+	uint16 playerState = (uint16)player->GetState();
+	uint16 playerDir = (uint16)player->GetDir();
+	uint16 playerMouseDir = (uint16)player->GetMouseDir();
+	Vector3 playerPos = player->GetPos();
+	Quaternion playerQuaternion = player->GetCameraLocalRotation();
+
+
+	bw.Write(sessionId);
+	bw.Write(playerState);
+	bw.Write(playerDir);
+	bw.Write(playerMouseDir);
+	bw.Write(playerPos);
+	bw.Write(playerQuaternion);
 
 	pktHeader->_type = PacketProtocol::S2C_PLAYERNEW;
 	pktHeader->_pktSize = bw.GetWriterSize();
@@ -118,12 +126,19 @@ void Sector::SendRemoveList(GameSession* session)
 	BufferWriter bw(sendBuffer);
 	PacketHeader* pktHeader = bw.WriteReserve<PacketHeader>();
 
-	bw.Write(session->GetSessionID());
-	bw.Write((uint16)player->GetState());
-	bw.Write((uint16)player->GetDir());
-	bw.Write((uint16)player->GetMouseDir());
-	bw.Write(player->GetPos());
-	bw.Write(player->GetCameraLocalRotation());
+	int32 sessionId = session->GetSessionID();
+	uint16 playerState = (uint16)player->GetState();
+	uint16 playerDir = (uint16)player->GetDir();
+	uint16 playerMouseDir = (uint16)player->GetMouseDir();
+	Vector3 playerPos = player->GetPos();
+	Quaternion playerQuaternion = player->GetCameraLocalRotation();
+
+	bw.Write(sessionId);
+	bw.Write(playerState);
+	bw.Write(playerDir);
+	bw.Write(playerMouseDir);
+	bw.Write(playerPos);
+	bw.Write(playerQuaternion);
 
 	pktHeader->_type = PacketProtocol::S2C_PLAYEROUT;
 	pktHeader->_pktSize = bw.GetWriterSize();

@@ -2,7 +2,8 @@
 #include "Player.h"
 #include "GameSession.h"
 #include "BufferWriter.h"
-#include "MapManager.h"
+#include "Map.h"
+
 Player::Player(GameSession* session, int32 sessionId, const Vector3& pos) : _sessionId(sessionId), _pos(pos), _state(State::IDLE), _dir(Dir::NONE), _mouseDir(Dir::NONE), _cameraLocalRotation({ 0,0,0,1 }), _session(session), _prevPos(pos)
 {
 	InitializeCriticalSection(&_cs);
@@ -12,7 +13,7 @@ Player::Player(GameSession* session, int32 sessionId, const Vector3& pos) : _ses
 Player::~Player()
 {
 	EnterCriticalSection(&_cs);
-	MapManager::GetInstance()->Reset(_session);
+	Map::GetInstance()->Reset(_session);
 	LeaveCriticalSection(&_cs);
 	DeleteCriticalSection(&_cs);
 }

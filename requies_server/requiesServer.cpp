@@ -4,6 +4,11 @@
 #include "ThreadManager.h"
 #include "IOCPCore.h"
 
+void Init() 
+{
+
+}
+
 unsigned int _stdcall Dispatch(void* Args)
 {
 	ServerService* service = reinterpret_cast<ServerService*>(Args);
@@ -13,6 +18,8 @@ unsigned int _stdcall Dispatch(void* Args)
 
 int main()
 {
+	Init();
+
 	const char* ip = "58.236.86.23";
 	ServerService service(ip, 30002, GameSession::MakeGameSession);
 

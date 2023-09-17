@@ -4,7 +4,7 @@
 #include "SessionManager.h"
 #include "BufferWriter.h"
 #include "PacketHandler.h"
-#include "MapManager.h"
+#include "Map.h"
 
 int	 GetRandom0to7()
 {
@@ -42,8 +42,7 @@ void GameSession::OnConnect()
 	int32 randomPosx = GetRandom0to7();
 	int32 randomPosz = GetRandom0to7();
 
-	// Vector3 startPos = MapManager::GetInstance()->GetStartPos(randomPosx, randomPosz);
-	Vector3 startPos = { 70,0,70 };
+	Vector3 startPos = Map::GetInstance()->GetStartPos(randomPosx, randomPosz);
 	_player = new Player(this, _sessionId, startPos);
 	SessionManager::GetInstance()->AddSession(this);
 
@@ -51,16 +50,23 @@ void GameSession::OnConnect()
 	BufferWriter bw(sendBuffer);
 	PacketHeader* pktHeader = bw.WriteReserve<PacketHeader>();
 
-	bw.Write(_sessionId);
-	bw.Write((uint16)_player->GetState());
-	bw.Write((uint16)_player->GetDir());
-	bw.Write((uint16)_player->GetMouseDir());
-	bw.Write(_player->GetPos());
-	bw.Write(_player->GetCameraLocalRotation());
+	int32 sessionId = _sessionId;
+	uint16 playerState = (uint16)_player->GetState();
+	uint16 playerDir = (uint16)_player->GetDir();
+	uint16 playerMouseDir = (uint16)_player->GetMouseDir();
+	Vector3 playerPos = _player->GetPos();
+	Quaternion playerQuaternion = _player->GetCameraLocalRotation();
+
+	bw.Write(sessionId);
+	bw.Write(playerState);
+	bw.Write(playerDir);
+	bw.Write(playerMouseDir);
+	bw.Write(playerPos);
+	bw.Write(playerQuaternion);
 
 	pktHeader->_type = PacketProtocol::S2C_PLAYERINIT;
 	pktHeader->_pktSize = bw.GetWriterSize();
 
 	Send(sendBuffer, pktHeader->_pktSize);
-	MapManager::GetInstance()->Set(this);
+	Map::GetInstance()->Set(this);
 }

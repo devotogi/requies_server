@@ -4,7 +4,7 @@
 #include "GameSession.h"
 #include "BufferReader.h"
 #include "BufferWriter.h"
-#include "MapManager.h"
+#include "Map.h"
 
 void PacketHandler::HandlePacket(GameSession* session, BYTE* packet, int32 packetSize)
 {
@@ -64,7 +64,7 @@ void PacketHandler::HandlePacket_C2S_PLAYERSYNC(GameSession* session, BYTE* pack
 	pktHeader->_type = PacketProtocol::S2C_PLAYERSYNC;
 	pktHeader->_pktSize = bw.GetWriterSize();
 
-	MapManager::GetInstance()->BroadCast(session, sendBuffer, bw.GetWriterSize());
+	Map::GetInstance()->BroadCast(session, sendBuffer, bw.GetWriterSize());
 }
 
 void PacketHandler::HandlePacket_C2S_LATENCY(GameSession* session, BYTE* packet, int32 packetSize)
@@ -106,6 +106,6 @@ void PacketHandler::HandlePacket_C2S_MAPSYNC(GameSession* session, BYTE* packet,
 	br.Read(quaternion);
 
 	player->PlayerSync(vector3, state, dir, mouseDir, quaternion);
-	MapManager::GetInstance()->Sync(session, prevPos, vector3);
+	Map::GetInstance()->MapSync(session, prevPos, vector3);
 	player->SetPrevPos(vector3);
 }

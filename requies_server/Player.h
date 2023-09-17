@@ -18,8 +18,8 @@ public:
 	Player(GameSession* session, int32 sessionId, const Vector3& pos);
 	~Player();
 
-	Vector3& GetPos() { return _pos; }
-	Vector3& GetPrevPos() { return _prevPos; }
+	Vector3&	GetPos() { return _pos; }
+	Vector3&	GetPrevPos() { return _prevPos; }
 	State		GetState() { return _state; }
 	Dir			GetDir() { return _dir; }
 	Dir			GetMouseDir() { return _mouseDir; }
