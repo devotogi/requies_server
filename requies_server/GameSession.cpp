@@ -32,7 +32,7 @@ void GameSession::OnRecv(Session* session, BYTE* dataPtr, int32 dataLen)
 
 void GameSession::OnDisconnect()
 {
-	SessionManager::GetInstance()->PopSession(this);
+	SessionManager::GetInstance()->PopSession(_sessionId);
 }
 
 void GameSession::OnConnect()
@@ -43,8 +43,8 @@ void GameSession::OnConnect()
 	int32 randomPosz = GetRandom0to7();
 
 	Vector3 startPos = Map::GetInstance()->GetStartPos(randomPosx, randomPosz);
-	_player = new Player(this, _sessionId, startPos);
-	SessionManager::GetInstance()->AddSession(this);
+	_player = new Player(this, _sessionId, {70,0,70});
+	SessionManager::GetInstance()->AddSession(_sessionId, this);
 
 	BYTE sendBuffer[100];
 	BufferWriter bw(sendBuffer);

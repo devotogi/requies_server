@@ -28,3 +28,16 @@ void Player::PlayerSync(const Vector3& pos, State state, Dir dir, Dir mousedir, 
 	_mouseDir = mousedir;
 	LeaveCriticalSection(&_cs);
 }
+
+void Player::Attacked()
+{
+	BYTE sendBuffer[100];
+	BufferWriter bw(sendBuffer);
+	PacketHeader* pktHeader = bw.WriteReserve<PacketHeader>();
+
+	bw.Write(_sessionId);
+	pktHeader->_type = PacketProtocol::S2C_PLAYERATTACKED;
+	pktHeader->_pktSize = bw.GetWriterSize();
+
+	Map::GetInstance()->BroadCast(_session, sendBuffer, bw.GetWriterSize());
+}

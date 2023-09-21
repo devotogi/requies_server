@@ -5,7 +5,7 @@
 #include "BufferReader.h"
 #include "BufferWriter.h"
 #include "Map.h"
-
+#include "SessionManager.h"
 void PacketHandler::HandlePacket(GameSession* session, BYTE* packet, int32 packetSize)
 {
 	PacketHeader* header = reinterpret_cast<PacketHeader*>(packet);
@@ -22,9 +22,12 @@ void PacketHandler::HandlePacket(GameSession* session, BYTE* packet, int32 packe
 		HandlePacket_C2S_MAPSYNC(session, dataPtr, dataSize);
 		break;
 
-
 	case PacketProtocol::C2S_LATENCY: // 모니터 레이턴시
 		HandlePacket_C2S_LATENCY(session, dataPtr, dataSize);
+		break;
+
+	case PacketProtocol::C2S_PLAYERATTACK:
+		HandlePacket_C2S_PLAYERATTACK(session, dataPtr, dataSize);
 		break;
 	}
 }
@@ -108,4 +111,17 @@ void PacketHandler::HandlePacket_C2S_MAPSYNC(GameSession* session, BYTE* packet,
 	player->PlayerSync(vector3, state, dir, mouseDir, quaternion);
 	Map::GetInstance()->MapSync(session, prevPos, vector3);
 	player->SetPrevPos(vector3);
+}
+
+void PacketHandler::HandlePacket_C2S_PLAYERATTACK(GameSession* session, BYTE* packet, int32 packetSize)
+{
+	int32 otherPlayer;
+	BufferReader br(packet);
+	br.Read(otherPlayer);
+	GameSession* AttackedSession = SessionManager::GetInstance()->GetSession(otherPlayer);
+
+	// TODO 좌표 계산
+
+	Player* AttackedPlayer = AttackedSession->GetPlayer();
+	AttackedPlayer->Attacked();
 }

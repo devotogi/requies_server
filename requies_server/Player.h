@@ -26,4 +26,5 @@ public:
 	Quaternion& GetCameraLocalRotation() { return _cameraLocalRotation; }
 	void		SetPrevPos(const Vector3& prevPos) { _prevPos = prevPos; }
 	void		PlayerSync(const Vector3& pos, State state, Dir dir, Dir mousedir, const Quaternion& cameraLocalRotation);
+	void        Attacked();
 };
