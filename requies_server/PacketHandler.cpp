@@ -120,7 +120,7 @@ void PacketHandler::HandlePacket_C2S_PLAYERATTACK(GameSession* session, BYTE* pa
 	br.Read(otherPlayer);
 	GameSession* AttackedSession = SessionManager::GetInstance()->GetSession(otherPlayer);
 
-	// TODO ÁÂÇ¥ °è»ê
+	// TODO ÁÂÇ¥ °è»ê 
 
 	Player* AttackedPlayer = AttackedSession->GetPlayer();
 	AttackedPlayer->Attacked();
