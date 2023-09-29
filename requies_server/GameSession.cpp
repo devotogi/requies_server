@@ -43,7 +43,7 @@ void GameSession::OnConnect()
 	int32 randomPosz = GetRandom0to7();
 
 	Vector3 startPos = Map::GetInstance()->GetStartPos(randomPosx, randomPosz);
-	_player = new Player(this, _sessionId, {70,0,70});
+	_player = new Player(this, _sessionId, {74,0,70});
 	SessionManager::GetInstance()->AddSession(_sessionId, this);
 
 	BYTE sendBuffer[100];
