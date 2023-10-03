@@ -44,6 +44,8 @@ void PacketHandler::HandlePacket_C2S_PLAYERSYNC(GameSession* session, BYTE* pack
 	Vector3 vector3;
 	Quaternion quaternion;
 	Vector3 target;
+	Quaternion localRtation;
+	Vector3 lookRotation;
 
 	br.Read(playerId);
 	br.Read(state);
@@ -52,8 +54,10 @@ void PacketHandler::HandlePacket_C2S_PLAYERSYNC(GameSession* session, BYTE* pack
 	br.Read(vector3);
 	br.Read(quaternion);
 	br.Read(target);
+	br.Read(localRtation);
+	br.Read(lookRotation);
 
-	player->PlayerSync(vector3, state, dir, mouseDir, quaternion, target);
+	player->PlayerSync(vector3, state, dir, mouseDir, quaternion, target, localRtation, lookRotation);
 
 	BYTE sendBuffer[100];
 	BufferWriter bw(sendBuffer);
@@ -66,6 +70,8 @@ void PacketHandler::HandlePacket_C2S_PLAYERSYNC(GameSession* session, BYTE* pack
 	bw.Write(player->GetPos());
 	bw.Write(player->GetCameraLocalRotation());
 	bw.Write(target);
+	bw.Write(player->GetLocalRotation());
+	bw.Write(player->GetLookRotation());
 
 	pktHeader->_type = PacketProtocol::S2C_PLAYERSYNC;
 	pktHeader->_pktSize = bw.GetWriterSize();
@@ -104,6 +110,8 @@ void PacketHandler::HandlePacket_C2S_MAPSYNC(GameSession* session, BYTE* packet,
 	Vector3 vector3;
 	Quaternion quaternion;
 	Vector3 target;
+	Quaternion localRtation;
+	Vector3 lookRotation;
 
 	br.Read(playerId);
 	br.Read(state);
@@ -112,8 +120,10 @@ void PacketHandler::HandlePacket_C2S_MAPSYNC(GameSession* session, BYTE* packet,
 	br.Read(vector3);
 	br.Read(quaternion);
 	br.Read(target);
+	br.Read(localRtation);
+	br.Read(lookRotation);
 
-	player->PlayerSync(vector3, state, dir, mouseDir, quaternion,target);
+	player->PlayerSync(vector3, state, dir, mouseDir, quaternion, target, localRtation, lookRotation);
 	Map::GetInstance()->MapSync(session, prevPos, vector3);
 	player->SetPrevPos(vector3);
 }
