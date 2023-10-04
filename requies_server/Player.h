@@ -14,8 +14,7 @@ private:
 	CRITICAL_SECTION _cs;
 	GameSession* _session;
 	Vector3 _target;
-	Quaternion _localrtation;
-	Vector3 _lookRotation;
+	MoveType _moveType;
 public:
 	Player(GameSession* session, int32 sessionId, const Vector3& pos);
 	~Player();
@@ -26,10 +25,9 @@ public:
 	Dir			GetDir() { return _dir; }
 	Dir			GetMouseDir() { return _mouseDir; }
 	Quaternion& GetCameraLocalRotation() { return _cameraLocalRotation; }
+	MoveType	GetMoveType() { return _moveType; }
 	Vector3&	GetTarget() { return _target; }
-	Vector3&	GetLookRotation() { return _lookRotation; }
-	Quaternion&	GetLocalRotation() { return _localrtation; }
 	void		SetPrevPos(const Vector3& prevPos) { _prevPos = prevPos; }
-	void		PlayerSync(const Vector3& pos, State state, Dir dir, Dir mousedir, const Quaternion& cameraLocalRotation, const Vector3& target, const Quaternion& localRation, const Vector3& lookRotation);
+	void		PlayerSync(const Vector3& pos, State state, Dir dir, Dir mousedir, const Quaternion& cameraLocalRotation, const Vector3& target, MoveType moveType);
 	void        Attacked();
 };

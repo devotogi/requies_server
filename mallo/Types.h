@@ -9,6 +9,12 @@ using uint32 = unsigned __int32;
 using uint64 = unsigned __int64;
 using wchar = wchar_t;
 
+enum MoveType : int32 
+{
+	KeyBoard,
+	Mouse
+};
+
 enum State : uint16
 {
 	IDLE,
