@@ -20,7 +20,7 @@ int main()
 {
 	Init();
 
-	const char* ip = "58.236.86.23";
+	const char* ip = "58.236.130.58";
 	ServerService service(ip, 30002, GameSession::MakeGameSession);
 
 	SYSTEM_INFO sysInfo;
