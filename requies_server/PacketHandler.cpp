@@ -128,10 +128,24 @@ void PacketHandler::HandlePacket_C2S_PLAYERATTACK(GameSession* session, BYTE* pa
 	int32 otherPlayer;
 	BufferReader br(packet);
 	br.Read(otherPlayer);
+
+
+	Player* AttackPlayer = session->GetPlayer();
 	GameSession* AttackedSession = SessionManager::GetInstance()->GetSession(otherPlayer);
 
-	// TODO ÁÂÇ¥ °è»ê 
+	if (AttackedSession == nullptr)
+		return;
 
 	Player* AttackedPlayer = AttackedSession->GetPlayer();
-	AttackedPlayer->Attacked();
+	
+	Vector3 attackedPos = AttackedPlayer->GetPos();
+	Vector3 attackerPos = AttackPlayer->GetPos();
+
+	if (attackedPos.x <= attackerPos.x + 2 && attackedPos.x >= attackedPos.x - 2) 
+	{
+		if (attackedPos.z <= attackerPos.z + 2 && attackedPos.z >= attackedPos.z - 2)
+		{
+			AttackedPlayer->Attacked();
+		}
+	}
 }
