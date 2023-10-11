@@ -32,13 +32,21 @@ void Player::PlayerSync(const Vector3& pos, State state, Dir dir, Dir mousedir, 
 	LeaveCriticalSection(&_cs);
 }
 
-void Player::Attacked()
+void Player::Attacked(int damage)
 {
+	_hp -= damage;
+
+	if (_hp <= 0) _hp = 0;
+
+	// TODO 죽었는지 처리
 	BYTE sendBuffer[100];
 	BufferWriter bw(sendBuffer);
 	PacketHeader* pktHeader = bw.WriteReserve<PacketHeader>();
 
 	bw.Write(_sessionId);
+	bw.Write(_hp);
+	bw.Write(_mp);
+
 	pktHeader->_type = PacketProtocol::S2C_PLAYERATTACKED;
 	pktHeader->_pktSize = bw.GetWriterSize();
 

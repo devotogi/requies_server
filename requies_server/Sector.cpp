@@ -59,6 +59,8 @@ void Sector::SendPlayerList(GameSession* session)
 	Vector3 playerTarget = player->GetTarget();
 	MoveType playerMoveType= player->GetMoveType();
 	Quaternion localRotation= player->GetLocalRtation();
+	float playerHp = player->GetHp();
+	float playerMp = player->GetMp();
 
 	bw.Write(sessionId);
 	bw.Write(playerState);
@@ -68,6 +70,8 @@ void Sector::SendPlayerList(GameSession* session)
 	bw.Write(playerQuaternion);
 	bw.Write(playerTarget);
 	bw.Write(playerMoveType);
+	bw.Write(localRotation);
+	bw.Write(playerMp);
 	bw.Write(localRotation);
 
 	pktHeader->_type = PacketProtocol::S2C_PLAYERNEW;
@@ -88,7 +92,7 @@ void Sector::SendPlayerList(GameSession* session)
 	{
 		int32 packetHeaderSize = 4;
 		int32 playerCntSize = 4;
-		int32 dataSize = 70;
+		int32 dataSize = 78;
 		int32 playerCnt = _sessions.size();
 
 		const int32 allocSize = packetHeaderSize + playerCntSize + (playerCnt * dataSize);
@@ -112,6 +116,8 @@ void Sector::SendPlayerList(GameSession* session)
 			bw.Write(p->GetTarget()); //12
 			bw.Write(p->GetMoveType()); //4
 			bw.Write(p->GetLocalRtation()); //16
+			bw.Write(p->GetHp());
+			bw.Write(p->GetMp());
 		}
 
 		session->Send(sendBuffer2, pktHeader->_pktSize);

@@ -131,9 +131,11 @@ void PacketHandler::HandlePacket_C2S_MAPSYNC(GameSession* session, BYTE* packet,
 void PacketHandler::HandlePacket_C2S_PLAYERATTACK(GameSession* session, BYTE* packet, int32 packetSize)
 {
 	int32 otherPlayer;
+	int32 damage;
+
 	BufferReader br(packet);
 	br.Read(otherPlayer);
-
+	br.Read(damage);
 
 	Player* AttackPlayer = session->GetPlayer();
 	GameSession* AttackedSession = SessionManager::GetInstance()->GetSession(otherPlayer);
@@ -150,7 +152,7 @@ void PacketHandler::HandlePacket_C2S_PLAYERATTACK(GameSession* session, BYTE* pa
 	{
 		if (attackedPos.z <= attackerPos.z + 2 && attackedPos.z >= attackedPos.z - 2)
 		{
-			AttackedPlayer->Attacked();
+			AttackedPlayer->Attacked(damage);
 		}
 	}
 }

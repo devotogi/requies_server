@@ -16,6 +16,8 @@ private:
 	Vector3 _target;
 	MoveType _moveType;
 	Quaternion _localRotation;
+	float _hp = 1000;
+	float _mp = 1000;
 public:
 	Player(GameSession* session, int32 sessionId, const Vector3& pos);
 	~Player();
@@ -29,7 +31,9 @@ public:
 	MoveType	GetMoveType() { return _moveType; }
 	Vector3&	GetTarget() { return _target; }
 	Quaternion&	GetLocalRtation() { return _localRotation; }
+	float		GetHp() { return _hp; }
+	float		GetMp() { return _mp; }
 	void		SetPrevPos(const Vector3& prevPos) { _prevPos = prevPos; }
 	void		PlayerSync(const Vector3& pos, State state, Dir dir, Dir mousedir, const Quaternion& cameraLocalRotation, const Vector3& target, MoveType moveType, Quaternion localRotation);
-	void        Attacked();
+	void        Attacked(int damage);
 };
