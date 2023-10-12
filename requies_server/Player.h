@@ -18,6 +18,7 @@ private:
 	Quaternion _localRotation;
 	float _hp = 1000;
 	float _mp = 1000;
+	bool _death = false;
 public:
 	Player(GameSession* session, int32 sessionId, const Vector3& pos);
 	~Player();
@@ -36,4 +37,5 @@ public:
 	void		SetPrevPos(const Vector3& prevPos) { _prevPos = prevPos; }
 	void		PlayerSync(const Vector3& pos, State state, Dir dir, Dir mousedir, const Quaternion& cameraLocalRotation, const Vector3& target, MoveType moveType, Quaternion localRotation);
 	void        Attacked(int damage);
+	void        ReSpawn();
 };

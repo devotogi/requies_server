@@ -34,6 +34,8 @@ void Player::PlayerSync(const Vector3& pos, State state, Dir dir, Dir mousedir, 
 
 void Player::Attacked(int damage)
 {
+	if (_death) return;
+
 	_hp -= damage;
 
 	if (_hp <= 0) _hp = 0;
@@ -51,4 +53,63 @@ void Player::Attacked(int damage)
 	pktHeader->_pktSize = bw.GetWriterSize();
 
 	Map::GetInstance()->BroadCast(_session, sendBuffer, bw.GetWriterSize());
+
+	if (_hp == 0) 
+	{
+		_death = true;
+		// 플레이어 죽음
+		BYTE sendBuffer[100];
+		BufferWriter bw(sendBuffer);
+		PacketHeader* pktHeader = bw.WriteReserve<PacketHeader>();
+
+		bw.Write(_sessionId);
+		pktHeader->_type = PacketProtocol::S2C_PLAYERDETH;
+		pktHeader->_pktSize = bw.GetWriterSize();
+
+		Map::GetInstance()->BroadCast(_session, sendBuffer, bw.GetWriterSize());
+	}
+}
+
+void Player::ReSpawn()
+{
+	Map::GetInstance()->Reset(_session);
+
+	EnterCriticalSection(&_cs);
+	_pos = { 67,0,72 };
+	_state = IDLE;
+	_dir = NONE;
+	_mouseDir = NONE;
+	LeaveCriticalSection(&_cs);
+
+	BYTE sendBuffer[100];
+	BufferWriter bw(sendBuffer);
+	PacketHeader* pktHeader = bw.WriteReserve<PacketHeader>();
+
+	int32 sessionId = _sessionId;
+	uint16 playerState = (uint16)_state;
+	uint16 playerDir = (uint16)_dir;
+	uint16 playerMouseDir = (uint16)_mouseDir;
+	Vector3 playerPos = _pos;
+	Quaternion playerQuaternion = _cameraLocalRotation;
+	_hp = 1000;
+	_mp = 1000;
+	float hp = _hp;
+	float mp = _mp;
+
+	bw.Write(sessionId);
+	bw.Write(playerState);
+	bw.Write(playerDir);
+	bw.Write(playerMouseDir);
+	bw.Write(playerPos);
+	bw.Write(playerQuaternion);
+	bw.Write(hp);
+	bw.Write(mp);
+	_death = false;
+	pktHeader->_type = PacketProtocol::S2C_PLAYERESPAWN;
+	pktHeader->_pktSize = bw.GetWriterSize();
+
+	_session->Send(sendBuffer, pktHeader->_pktSize);
+	Map::GetInstance()->Set(_session);
+
+
 }

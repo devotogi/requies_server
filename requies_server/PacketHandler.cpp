@@ -32,6 +32,11 @@ void PacketHandler::HandlePacket(GameSession* session, BYTE* packet, int32 packe
 
 	case PacketProtocol::C2S_PLAYERCHAT:
 		HandlePacket_C2S_PLAYERCHAT(session, dataPtr, dataSize);
+		break;
+
+	case PacketProtocol::C2S_PLAYERESPAWN:
+		HandlePacket_C2S_PLAYERESPAWN(session, dataPtr, dataSize);
+		break;
 	}
 }
 
@@ -165,7 +170,6 @@ void PacketHandler::HandlePacket_C2S_PLAYERCHAT(GameSession* session, BYTE* pack
 	int32 chattingMsgSize;
 	int32 sessionId = session->GetSessionID();
 
-
 	BufferReader br(packet);
 	WCHAR text[1000] = {0};
 	br.Read(chattingMsgSize);
@@ -183,4 +187,9 @@ void PacketHandler::HandlePacket_C2S_PLAYERCHAT(GameSession* session, BYTE* pack
 	pktHeader->_pktSize = bw.GetWriterSize();
 
 	Map::GetInstance()->BroadCast(session, sendBuffer, bw.GetWriterSize());
+}
+
+void PacketHandler::HandlePacket_C2S_PLAYERESPAWN(GameSession* session, BYTE* packet, int32 packetSize)
+{
+	session->GetPlayer()->ReSpawn();
 }
