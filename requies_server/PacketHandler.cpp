@@ -29,6 +29,9 @@ void PacketHandler::HandlePacket(GameSession* session, BYTE* packet, int32 packe
 	case PacketProtocol::C2S_PLAYERATTACK:
 		HandlePacket_C2S_PLAYERATTACK(session, dataPtr, dataSize);
 		break;
+
+	case PacketProtocol::C2S_PLAYERCHAT:
+		HandlePacket_C2S_PLAYERCHAT(session, dataPtr, dataSize);
 	}
 }
 
@@ -155,4 +158,26 @@ void PacketHandler::HandlePacket_C2S_PLAYERATTACK(GameSession* session, BYTE* pa
 			AttackedPlayer->Attacked(damage);
 		}
 	}
+}
+
+void PacketHandler::HandlePacket_C2S_PLAYERCHAT(GameSession* session, BYTE* packet, int32 packetSize)
+{
+	int32 chattingMsgSize;
+	
+	BufferReader br(packet);
+	WCHAR text[1000] = {0};
+	br.Read(chattingMsgSize);
+	br.ReadWString(text, chattingMsgSize);
+	
+	BYTE sendBuffer[1000];
+	BufferWriter bw(sendBuffer);
+	PacketHeader* pktHeader = bw.WriteReserve<PacketHeader>();
+
+	bw.Write(chattingMsgSize);
+	bw.WriteWString(text, chattingMsgSize);
+
+	pktHeader->_type = PacketProtocol::S2C_PLAYERCHAT;
+	pktHeader->_pktSize = bw.GetWriterSize();
+
+	Map::GetInstance()->BroadCast(session, sendBuffer, bw.GetWriterSize());
 }
