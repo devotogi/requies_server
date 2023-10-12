@@ -163,7 +163,9 @@ void PacketHandler::HandlePacket_C2S_PLAYERATTACK(GameSession* session, BYTE* pa
 void PacketHandler::HandlePacket_C2S_PLAYERCHAT(GameSession* session, BYTE* packet, int32 packetSize)
 {
 	int32 chattingMsgSize;
-	
+	int32 sessionId = session->GetSessionID();
+
+
 	BufferReader br(packet);
 	WCHAR text[1000] = {0};
 	br.Read(chattingMsgSize);
@@ -173,6 +175,7 @@ void PacketHandler::HandlePacket_C2S_PLAYERCHAT(GameSession* session, BYTE* pack
 	BufferWriter bw(sendBuffer);
 	PacketHeader* pktHeader = bw.WriteReserve<PacketHeader>();
 
+	bw.Write(sessionId);
 	bw.Write(chattingMsgSize);
 	bw.WriteWString(text, chattingMsgSize);
 
