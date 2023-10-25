@@ -13,4 +13,5 @@
 #include <process.h>
 #include <WS2tcpip.h>
 #include <random>
+#include <fstream>
 #include "Types.h"
