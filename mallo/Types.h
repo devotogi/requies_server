@@ -121,3 +121,23 @@ struct Quaternion
 	float z;
 	float w;
 };
+
+struct BoundBox 
+{
+	int maxX = 0;
+	int maxZ = 0;
+	int minX = 0;
+	int minZ = 0;
+};
+
+struct FPS 
+{
+public:
+	long long lastTick = 0;
+	long long sumTick = 0;
+};
+
+enum MonsterType 
+{
+	Bear
+};

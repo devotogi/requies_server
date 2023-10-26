@@ -9,6 +9,9 @@
     <ClCompile Include="PacketHandler.cpp" />
     <ClCompile Include="Sector.cpp" />
     <ClCompile Include="Map.cpp" />
+    <ClCompile Include="MapDataManager.cpp" />
+    <ClCompile Include="SpawnZone.cpp" />
+    <ClCompile Include="Monster.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -18,5 +21,8 @@
     <ClInclude Include="PacketHandler.h" />
     <ClInclude Include="Sector.h" />
     <ClInclude Include="Map.h" />
+    <ClInclude Include="MapDataManager.h" />
+    <ClInclude Include="SpawnZone.h" />
+    <ClInclude Include="Monster.h" />
   </ItemGroup>
 </Project>
