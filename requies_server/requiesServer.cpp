@@ -4,6 +4,8 @@
 #include "ThreadManager.h"
 #include "IOCPCore.h"
 #include "MapDataManager.h"
+#include "SpawnZone.h"
+#include "Map.h"
 
 void Init() 
 {
@@ -40,6 +42,33 @@ void Init()
 	}
 
 	std::cout << "MapData Parse End" << std::endl;
+
+	std::cout << "SpawnZone Init Start" << std::endl;
+	const int32 zrange = zSize / 32;
+	const int32 xrange = xSize / 32;
+	Map::GetInstance()->SpawnZones().resize(zrange);
+
+	for (int32 z = 0; z < zrange; z++)
+		Map::GetInstance()->SpawnZones()[z].resize(xrange);
+
+	for (int32 z = 0; z < zrange; z++)
+	{
+		for (int32 x = 0; x < xrange; x++)
+		{
+			int32 sz = z * 32;
+			int32 sx = x * 32;
+
+			int32 ez = sz + 32;
+			int32 ex = sx + 32;
+
+			BoundBox bound{ ex,ez,sx,sz, };
+			Map::GetInstance()->SpawnZones()[z][x] = new SpawnZone(10, bound, MonsterType::Bear);;
+		}
+	}
+	
+
+	Map::GetInstance()->SetSMaxSize(xrange, zrange);
+	std::cout << "SpawnZone Init End" << std::endl;
 }
 
 unsigned int _stdcall Dispatch(void* Args)
@@ -53,14 +82,21 @@ unsigned int _stdcall AcceptProc(void* Args)
 {
 	ServerService* service = reinterpret_cast<ServerService*>(Args);
 	service->Start();
+
+	return 0;
+}
+
+void Update() 
+{
+	Map::GetInstance()->Update();
 }
 
 int main()
 {
 	Init();
 
-	const char* ip = "127.0.0.1";
-	ServerService service(ip, 7777, GameSession::MakeGameSession);
+	const char* ip = "58.236.130.58";
+	ServerService service(ip, 30002, GameSession::MakeGameSession);
 
 	SYSTEM_INFO sysInfo;
 	GetSystemInfo(&sysInfo);
@@ -71,6 +107,12 @@ int main()
 		ThreadManager::GetInstance()->Launch(Dispatch, &service);
 
 	ThreadManager::GetInstance()->Launch(AcceptProc, &service);
+
+	while (true) 
+	{
+		Update();
+		Sleep(1);
+	}
 
 	return 0;
 }

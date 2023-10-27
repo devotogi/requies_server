@@ -4,6 +4,7 @@
 #include "Player.h"
 #include "BufferWriter.h"
 #include "Sector.h"
+#include "SpawnZone.h"
 // 자기자신, 위, 오른위, 오른, 오른아래, 아래, 왼아래, 왼, 왼위
 int32 dx[9] = { 0,0,1,1,1,0,-1,-1,-1 };
 int32 dz[9] = { 0,-1,-1,0,1,1,1,0,-1 };
@@ -63,7 +64,10 @@ void Map::Set(GameSession* session)
 	ConvertSectorIndexAddAdjacentrtSectorIndexAll(nowPos, adjacent);
 
 	for (auto item : adjacent)
+	{
 		_sectors[item.z][item.x]->SendPlayerList(session);
+		_spawnZone[item.z][item.x]->SendMonsterList(session);
+	}
 }
 
 void Map::Reset(GameSession* session)
@@ -78,7 +82,9 @@ void Map::Reset(GameSession* session)
 	ConvertSectorIndexAddAdjacentrtSectorIndexAll(nowPos, adjacent);
 
 	for (auto item : adjacent)
+	{
 		_sectors[item.z][item.x]->SendRemoveList(session);
+	}
 }
 
 Pos Map::ConvertSectorIndex(const Vector3& pos)
@@ -141,6 +147,26 @@ void Map::BroadCast(GameSession* session, BYTE* sendBuffer, int32 sendSize)
 		_sectors[item.z][item.x]->BroadCast(session, sendBuffer, sendSize);
 }
 
+void Map::BroadCast(const Vector3& pos, BYTE* sendBuffer, int32 sendSize)
+{
+	std::vector<Pos> adjacent;
+	ConvertSectorIndexAddAdjacentrtSectorIndexAll(pos, adjacent);
+	
+	for (auto item : adjacent)
+		_sectors[item.z][item.x]->BroadCast(nullptr, sendBuffer, sendSize);
+}
+
+void Map::Update()
+{
+	for (int32 z = 0; z < _smaxZ; z++)
+	{
+		for (int32 x = 0; x < _smaxX; x++)
+		{
+			_spawnZone[z][x]->Update();
+		}
+	}
+}
+
 void Map::MapSync(GameSession* session, const Vector3& prevPos, const Vector3& nowPos)
 {
 	Pos prevMapIndex = ConvertSectorIndex(prevPos);
@@ -152,6 +178,7 @@ void Map::MapSync(GameSession* session, const Vector3& prevPos, const Vector3& n
 		_sectors[nowMapIndex.z][nowMapIndex.x]->Set(session);
 
 		MapSyncAdjacentRemoveAndInsert(session, prevPos, nowPos);
+
 	}
 }
 
@@ -186,8 +213,14 @@ void Map::MapSyncAdjacentRemoveAndInsert(GameSession* session, const Vector3& pr
 	}
 
 	for (auto item : remove)
+	{
 		_sectors[item.z][item.x]->SendRemoveList(session);
+		_spawnZone[item.z][item.x]->SendRemoveList(session);
+	}
 
 	for (auto item : adds)
+	{
 		_sectors[item.z][item.x]->SendPlayerList(session);
+		_spawnZone[item.z][item.x]->SendMonsterList(session);
+	}
 }

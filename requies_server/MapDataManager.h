@@ -5,6 +5,8 @@ private:
 	int32 _zSize;
 	int32 _xSize;
 	std::vector<std::vector<int32>> _mapData;
+	std::stack<int32> _monsterIds;
+	long long _monsterId = 0;
 
 public:
 	static MapDataManager* GetInstnace() 
@@ -36,6 +38,28 @@ public:
 			return false;
 
 		return true;
+	}
+
+	int32 PopMonsterId() 
+	{
+		int32 ret;
+
+		if (_monsterIds.empty())
+		{
+			ret = ++_monsterId;
+		}
+		else
+		{
+			ret = _monsterIds.top();
+			_monsterIds.pop();
+		}
+
+		return ret;
+	}
+
+	int32 PushMonsterId(int32 id) 
+	{
+		_monsterIds.push(id);
 	}
 };
 

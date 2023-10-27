@@ -57,6 +57,9 @@ enum PacketProtocol : __int16
 	S2C_PLAYERDETH,
 	C2S_PLAYERESPAWN,
 	S2C_PLAYERESPAWN,
+	S2C_MONSTERSPAWN,
+	S2C_MONSTERREMOVELIST,
+	S2C_MONSTERRENEWLIST,
 };
 
 struct Pos
@@ -124,10 +127,13 @@ struct Quaternion
 
 struct BoundBox 
 {
+public:
 	int maxX = 0;
 	int maxZ = 0;
 	int minX = 0;
 	int minZ = 0;
+
+
 };
 
 struct FPS 
@@ -137,7 +143,7 @@ public:
 	long long sumTick = 0;
 };
 
-enum MonsterType 
+enum MonsterType : int32
 {
 	Bear
 };
