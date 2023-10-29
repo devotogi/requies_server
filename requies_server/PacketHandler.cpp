@@ -37,6 +37,10 @@ void PacketHandler::HandlePacket(GameSession* session, BYTE* packet, int32 packe
 	case PacketProtocol::C2S_PLAYERESPAWN:
 		HandlePacket_C2S_PLAYERESPAWN(session, dataPtr, dataSize);
 		break;
+
+	case PacketProtocol::C2S_MONSTERATTACKED:
+		HandlePacket_C2S_MONSTERATTACKED(session, dataPtr, dataSize);
+		break;
 	}
 }
 
@@ -192,4 +196,19 @@ void PacketHandler::HandlePacket_C2S_PLAYERCHAT(GameSession* session, BYTE* pack
 void PacketHandler::HandlePacket_C2S_PLAYERESPAWN(GameSession* session, BYTE* packet, int32 packetSize)
 {
 	session->GetPlayer()->ReSpawn();
+}
+
+void PacketHandler::HandlePacket_C2S_MONSTERATTACKED(GameSession* session, BYTE* packet, int32 packetSize)
+{	
+	int32 monsterId;
+	int32 damage;
+	Vector3 monsterPos;
+
+	BufferReader br(packet);
+	br.Read(monsterId);
+	br.Read(monsterPos);
+	br.Read(damage);
+
+	Player* AttackPlayer = session->GetPlayer();
+	Map::GetInstance()->AttackedMonster(monsterPos,monsterId, damage);
 }

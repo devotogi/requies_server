@@ -167,6 +167,12 @@ void Map::Update()
 	}
 }
 
+void Map::AttackedMonster(const Vector3& pos, int32 monsterId, int32 damage)
+{
+	Pos here = ConvertSectorIndex(pos);
+	_spawnZone[here.z][here.x]->AttackedMonster(monsterId, damage);
+}
+
 void Map::MapSync(GameSession* session, const Vector3& prevPos, const Vector3& nowPos)
 {
 	Pos prevMapIndex = ConvertSectorIndex(prevPos);

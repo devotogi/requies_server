@@ -62,7 +62,7 @@ void Init()
 			int32 ex = sx + 32;
 
 			BoundBox bound{ ex,ez,sx,sz, };
-			Map::GetInstance()->SpawnZones()[z][x] = new SpawnZone(10, bound, MonsterType::Bear);;
+			Map::GetInstance()->SpawnZones()[z][x] = new SpawnZone(1, bound, MonsterType::Bear);
 		}
 	}
 	
@@ -107,12 +107,11 @@ int main()
 		ThreadManager::GetInstance()->Launch(Dispatch, &service);
 
 	ThreadManager::GetInstance()->Launch(AcceptProc, &service);
-
+	
 	while (true) 
 	{
 		Update();
 		Sleep(1);
 	}
-
 	return 0;
 }

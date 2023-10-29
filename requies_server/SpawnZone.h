@@ -23,9 +23,10 @@ public:
 	void Update();
 	void SendMonsterList(GameSession* session);
 	void SendRemoveList(GameSession* session);
-
+	void AttackedMonster(int32 monsterId, int32 damage);
 private:
 	void AddMonster(int32 monsterKey, Monster* monster);
+	void RemoveMonster(int32 monsterKey);
 	void Spawn();
 	Vector3 RandomSpawnPos();
 	void SendMonsterSpawn(Monster* monster);

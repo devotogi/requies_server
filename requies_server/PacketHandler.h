@@ -13,5 +13,6 @@ private:
 	static void HandlePacket_C2S_PLAYERATTACK(GameSession* session, BYTE* packet, int32 packetSize);
 	static void HandlePacket_C2S_PLAYERCHAT(GameSession* session, BYTE* packet, int32 packetSize);
 	static void HandlePacket_C2S_PLAYERESPAWN(GameSession* session, BYTE* packet, int32 packetSize);
+	static void HandlePacket_C2S_MONSTERATTACKED(GameSession* session, BYTE* packet, int32 packetSize);
 };
 
