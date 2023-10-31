@@ -2,8 +2,9 @@
 class TCPListener;
 class IOCPCore;
 class Session;
+#include "CThread.h"
 
-class Service
+class Service : public CThread
 {
 protected:
 	IOCPCore* _iocpCore;
@@ -13,5 +14,7 @@ public:
 	virtual ~Service();
 
 	IOCPCore* GetIOCPCore() { return _iocpCore; }
+
 	virtual void Start() abstract;
+	virtual void Run() abstract;
 };

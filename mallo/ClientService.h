@@ -12,5 +12,6 @@ public:
 	virtual ~ClientService();
 
 	virtual void Start();
+	virtual void Run() override;
 
 };

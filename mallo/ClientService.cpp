@@ -32,3 +32,7 @@ void ClientService::Start()
         }
     }
 }
+
+void ClientService::Run()
+{
+}

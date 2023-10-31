@@ -43,6 +43,9 @@
     <ClInclude Include="BufferReader.h">
       <Filter>Base</Filter>
     </ClInclude>
+    <ClInclude Include="CThread.h">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Base">
@@ -88,6 +91,9 @@
     </ClCompile>
     <ClCompile Include="BufferReader.cpp">
       <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="CThread.cpp">
+      <Filter>Core</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

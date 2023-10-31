@@ -14,6 +14,17 @@ ServerService::~ServerService()
         delete _tcpListener;
 }
 
+void ServerService::IOCPRun()
+{
+    SYSTEM_INFO sysInfo;
+    GetSystemInfo(&sysInfo);
+
+    int32 threadCount = sysInfo.dwNumberOfProcessors * 2;
+
+    for (int i = 0; i < threadCount; i++)
+        _iocpCore->ThreadStart();
+}
+
 void ServerService::Start()
 {
     wprintf(L"ServerStart\n");
@@ -30,4 +41,9 @@ void ServerService::Start()
             wprintf(L"ServerStart Error\n");
         }
     }
+}
+
+void ServerService::Run()
+{
+    ServerService::Start();
 }

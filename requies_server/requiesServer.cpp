@@ -71,21 +71,6 @@ void Init()
 	std::cout << "SpawnZone Init End" << std::endl;
 }
 
-unsigned int _stdcall Dispatch(void* Args)
-{
-	ServerService* service = reinterpret_cast<ServerService*>(Args);
-	while (true)
-		service->GetIOCPCore()->Dispatch();
-}
-
-unsigned int _stdcall AcceptProc(void* Args) 
-{
-	ServerService* service = reinterpret_cast<ServerService*>(Args);
-	service->Start();
-
-	return 0;
-}
-
 void Update() 
 {
 	Map::GetInstance()->Update();
@@ -98,20 +83,14 @@ int main()
 	const char* ip = "58.236.130.58";
 	ServerService service(ip, 30002, GameSession::MakeGameSession);
 
-	SYSTEM_INFO sysInfo;
-	GetSystemInfo(&sysInfo);
-
-	int32 threadCount = sysInfo.dwNumberOfProcessors * 2;
-
-	for (int i = 0; i < threadCount; i++)
-		ThreadManager::GetInstance()->Launch(Dispatch, &service);
-
-	ThreadManager::GetInstance()->Launch(AcceptProc, &service);
+	service.IOCPRun();
+	service.ThreadStart();
 	
 	while (true) 
 	{
 		Update();
 		Sleep(1);
 	}
+
 	return 0;
 }

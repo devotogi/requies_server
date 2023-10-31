@@ -42,3 +42,9 @@ void IOCPCore::Dispatch()
         session->Recv(numOfBytes);
     }
 }
+
+void IOCPCore::Run() 
+{
+    while (true)
+        Dispatch();
+}

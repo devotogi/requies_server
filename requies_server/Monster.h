@@ -5,7 +5,7 @@ private:
 	MonsterType _type;
 	int32 _monsterId;
 	Vector3 _pos;
-	int32 _hp = 3;
+	int32 _hp = 1000;
 public:
 	Monster(int32 monsterId, MonsterType type);
 	~Monster();

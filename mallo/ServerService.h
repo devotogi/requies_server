@@ -11,7 +11,8 @@ protected:
 public:
 	ServerService(const char* ip, uint16 port, Session* (*sessionFactory)(const SOCKET&, const SOCKADDR_IN&));
 	virtual ~ServerService();
-
+	void IOCPRun();
 	virtual void Start() override;
+	virtual void Run() override;
 };
 
