@@ -1,5 +1,6 @@
 #pragma once
-class Monster
+#include "GameObject.h"
+class Monster : public GameObject
 {
 	enum : int32
 	{
@@ -10,12 +11,10 @@ private:
 	MonsterType _type;
 	State _state;
 	int32 _monsterId;
-	Vector3 _pos;
 	int32 _hp = 1000;
-
 	FPS _attackedFps;
 public:
-	Monster(int32 monsterId, MonsterType type);
+	Monster(int32 monsterId, MonsterType type, const Vector3& pos);
 	~Monster();
 
 	int32 GetMonsterId() { return _monsterId; }

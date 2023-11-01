@@ -89,10 +89,9 @@ void SpawnZone::Spawn()
 	for (int32 i = 0; i < spawnMonsterCnt; i++) 
 	{
 		int32 newMonsterId = MapDataManager::GetInstnace()->PopMonsterId();
-		Monster* monster = new Monster(newMonsterId, MonsterType::Bear);
-		AddMonster(newMonsterId, monster);
 		Vector3 monsterPos = RandomSpawnPos();
-		monster->SetPos(monsterPos);
+		Monster* monster = new Monster(newMonsterId, MonsterType::Bear, monsterPos);
+		AddMonster(newMonsterId, monster);
 		SendMonsterSpawn(monster);
 	}
 }

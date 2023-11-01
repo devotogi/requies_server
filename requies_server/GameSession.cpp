@@ -5,6 +5,7 @@
 #include "BufferWriter.h"
 #include "PacketHandler.h"
 #include "Map.h"
+#include "MapDataManager.h"
 
 int	 GetRandom0to7()
 {
@@ -33,6 +34,7 @@ void GameSession::OnRecv(Session* session, BYTE* dataPtr, int32 dataLen)
 void GameSession::OnDisconnect()
 {
 	SessionManager::GetInstance()->PopSession(_sessionId);
+	MapDataManager::GetInstnace()->ApplyMapGameObject(_player,false);
 }
 
 void GameSession::OnConnect()
@@ -70,7 +72,8 @@ void GameSession::OnConnect()
 
 	pktHeader->_type = PacketProtocol::S2C_PLAYERINIT;
 	pktHeader->_pktSize = bw.GetWriterSize();
-
+	
 	Send(sendBuffer, pktHeader->_pktSize);
 	Map::GetInstance()->Set(this);
+	MapDataManager::GetInstnace()->ApplyMapGameObject(_player, true);
 }

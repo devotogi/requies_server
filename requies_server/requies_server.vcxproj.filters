@@ -12,6 +12,7 @@
     <ClCompile Include="MapDataManager.cpp" />
     <ClCompile Include="SpawnZone.cpp" />
     <ClCompile Include="Monster.cpp" />
+    <ClCompile Include="GameObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -24,5 +25,6 @@
     <ClInclude Include="MapDataManager.h" />
     <ClInclude Include="SpawnZone.h" />
     <ClInclude Include="Monster.h" />
+    <ClInclude Include="GameObject.h" />
   </ItemGroup>
 </Project>

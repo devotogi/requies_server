@@ -1,11 +1,11 @@
 #pragma once
+#include "GameObject.h"
 class GameSession;
 
-class Player
+class Player : public GameObject
 {
 private:
 	int32 _sessionId;
-	Vector3	_pos;
 	Vector3	_prevPos;
 	State _state;
 	Dir	_dir;

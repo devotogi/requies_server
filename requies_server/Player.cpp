@@ -4,7 +4,7 @@
 #include "BufferWriter.h"
 #include "Map.h"
 
-Player::Player(GameSession* session, int32 sessionId, const Vector3& pos) : _sessionId(sessionId), _pos(pos), _state(State::IDLE), _dir(Dir::NONE), _mouseDir(Dir::NONE), _cameraLocalRotation({ 0,0,0,1 }), _session(session), _prevPos(pos)
+Player::Player(GameSession* session, int32 sessionId, const Vector3& pos) : _sessionId(sessionId), _state(State::IDLE), _dir(Dir::NONE), _mouseDir(Dir::NONE), _cameraLocalRotation({ 0,0,0,1 }), _session(session), _prevPos(pos), GameObject(pos)
 {
 	InitializeCriticalSection(&_cs);
 

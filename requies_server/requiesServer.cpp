@@ -6,7 +6,7 @@
 #include "MapDataManager.h"
 #include "SpawnZone.h"
 #include "Map.h"
-
+#include "GameObject.h"
 void Init() 
 {
 	std::cout << "MapData Parse Start" << std::endl;
@@ -32,6 +32,7 @@ void Init()
 	
 	MapDataManager::GetInstnace()->SetSize(zSize, xSize);
 	MapDataManager::GetInstnace()->MapData().resize(zSize + 1, std::vector<int>(xSize + 1, 0));
+	MapDataManager::GetInstnace()->MapDataGameObject().resize(zSize + 1, std::vector<std::set<GameObject*>>(xSize + 1));
 
 	for (int32 z = 0; z <= zSize; z++)
 	{

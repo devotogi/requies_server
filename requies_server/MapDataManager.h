@@ -1,14 +1,18 @@
 #pragma once
+#include "GameObject.h"
+
 class MapDataManager
 {
 private:
 	int32 _zSize;
 	int32 _xSize;
 	std::vector<std::vector<int32>> _mapData;
+	std::vector<std::vector<std::set<GameObject*>>> _mapDataGameObject;
 	std::stack<int32> _monsterIds;
 	long long _monsterId = 0;
 
 	CRITICAL_SECTION _cs;
+	CRITICAL_SECTION _mapDataGameObjectCs;
 
 public:
 	static MapDataManager* GetInstnace() 
@@ -20,16 +24,56 @@ public:
 	MapDataManager() 
 	{
 		InitializeCriticalSection(&_cs);
+		InitializeCriticalSection(&_mapDataGameObjectCs);
 	}
 
 	~MapDataManager() 
 	{
 		DeleteCriticalSection(&_cs);
+		DeleteCriticalSection(&_mapDataGameObjectCs);
 	}
 
 	std::vector<std::vector<int32>>& MapData() 
 	{
 		return _mapData;
+	}
+
+	std::vector<std::vector<std::set<GameObject*>>>& MapDataGameObject()
+	{
+		return _mapDataGameObject;
+	}
+
+	void ApplyMapGameObject(GameObject* object, bool add)
+	{
+		EnterCriticalSection(&_mapDataGameObjectCs);
+		
+		Vector3 playerPos = object->GetPos();
+		int32 x = static_cast<int32>(playerPos.x);
+		int32 z = static_cast<int32>(playerPos.z);
+
+		if (add)
+			_mapDataGameObject[z][x].insert(object);
+
+		else
+			_mapDataGameObject[z][x].erase(object);
+
+		LeaveCriticalSection(&_mapDataGameObjectCs);
+	}
+
+	void ApplyMapGameObject(GameObject* object, Vector3 pos, bool add) 
+	{
+		EnterCriticalSection(&_mapDataGameObjectCs);
+
+		int32 x = static_cast<int32>(pos.x);
+		int32 z = static_cast<int32>(pos.z);
+
+		if (add)
+			_mapDataGameObject[z][x].insert(object);
+
+		else
+			_mapDataGameObject[z][x].erase(object);
+
+		LeaveCriticalSection(&_mapDataGameObjectCs);
 	}
 
 	void SetSize(int32 zSize, int32 xSize) 

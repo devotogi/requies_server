@@ -5,6 +5,7 @@
 #include "BufferWriter.h"
 #include "Sector.h"
 #include "SpawnZone.h"
+#include "MapDataManager.h"
 // 자기자신, 위, 오른위, 오른, 오른아래, 아래, 왼아래, 왼, 왼위
 int32 dx[9] = { 0,0,1,1,1,0,-1,-1,-1 };
 int32 dz[9] = { 0,-1,-1,0,1,1,1,0,-1 };
@@ -178,13 +179,16 @@ void Map::MapSync(GameSession* session, const Vector3& prevPos, const Vector3& n
 	Pos prevMapIndex = ConvertSectorIndex(prevPos);
 	Pos nowMapIndex = ConvertSectorIndex(nowPos);
 
+	session->GetPlayer();
+	MapDataManager::GetInstnace()->ApplyMapGameObject(session->GetPlayer(),prevPos, false);
+	MapDataManager::GetInstnace()->ApplyMapGameObject(session->GetPlayer(),nowPos, true);
+
 	if (prevMapIndex != nowMapIndex)
 	{
 		_sectors[prevMapIndex.z][prevMapIndex.x]->Reset(session);
 		_sectors[nowMapIndex.z][nowMapIndex.x]->Set(session);
 
 		MapSyncAdjacentRemoveAndInsert(session, prevPos, nowPos);
-
 	}
 }
 

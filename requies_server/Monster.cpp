@@ -2,7 +2,7 @@
 #include "Monster.h"
 #include "BufferWriter.h"
 #include "Map.h"
-Monster::Monster(int32 monsterId, MonsterType type) : _monsterId(monsterId), _type(type), _state(STATE_NONE)
+Monster::Monster(int32 monsterId, MonsterType type, const Vector3& pos) : _monsterId(monsterId), _type(type), _state(STATE_NONE), GameObject(pos)
 {
 }
 
