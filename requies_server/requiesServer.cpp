@@ -12,7 +12,8 @@ void Init()
 	std::cout << "MapData Parse Start" << std::endl;
 
 	FILE* fp = NULL;
-	fopen_s(&fp,"C:\\Users\\jgkang\\Desktop\\map\\map.dat", "r");
+	// C:\Users\jgkan\Desktop\map
+	fopen_s(&fp,"C:\\Users\\jgkan\\Desktop\\map\\map.dat", "r");
 	
 	fseek(fp, 0, SEEK_END);
 	const int32 size = ftell(fp);
@@ -80,8 +81,8 @@ int main()
 {
 	Init();
 
-	const char* ip = "58.236.130.58";
-	ServerService service(ip, 30002, GameSession::MakeGameSession);
+	const char* ip = "127.0.0.1";
+	ServerService service(ip, 7777, GameSession::MakeGameSession);
 
 	service.IOCPRun();
 	service.ThreadStart();

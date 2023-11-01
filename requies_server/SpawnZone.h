@@ -6,13 +6,15 @@ class SpawnZone
 {
 	enum
 	{
-		SPAWN_TICK = 1000
+		SPAWN_TICK = 10000,
+		MONSTERUPDATE_TICK = 20
 	};
 
 private:
 	int32						 _maxSpawnCount = 0;
 	BoundBox					 _boundBox;
 	FPS							 _spawnFps;
+	FPS							 _monsterUpdateFps;
 	MonsterType					 _monsterType;
 	std::map<int32, Monster*>    _monsterDic;
 	CRITICAL_SECTION			 _cs;
@@ -27,6 +29,7 @@ public:
 private:
 	void AddMonster(int32 monsterKey, Monster* monster);
 	void RemoveMonster(int32 monsterKey);
+	void MonsterUpdate();
 	void Spawn();
 	Vector3 RandomSpawnPos();
 	void SendMonsterSpawn(Monster* monster);

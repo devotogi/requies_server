@@ -39,6 +39,18 @@ void SpawnZone::Update()
 		}
 		_spawnFps.sumTick = 0;
 	}
+
+	int monsterUpdateDeltaTick = currentTick - _monsterUpdateFps.lastTick;
+	_monsterUpdateFps.sumTick += monsterUpdateDeltaTick;
+
+	_monsterUpdateFps.lastTick = currentTick;
+
+
+	if (_monsterUpdateFps.sumTick >= MONSTERUPDATE_TICK)
+	{
+		MonsterUpdate();
+		_monsterUpdateFps.sumTick = 0;
+	}
 }
 
 void SpawnZone::AddMonster(int32 monsterKey, Monster* monster)
@@ -52,6 +64,19 @@ void SpawnZone::RemoveMonster(int32 monsterKey)
 {
 	EnterCriticalSection(&_cs);
 	_monsterDic.erase( monsterKey );
+	LeaveCriticalSection(&_cs);
+}
+
+void SpawnZone::MonsterUpdate()
+{
+	EnterCriticalSection(&_cs);
+	for (auto monsterDic : _monsterDic)
+	{
+		int32 monsterId = monsterDic.first;
+		Monster* monster = monsterDic.second;
+
+		monster->Update();
+	}
 	LeaveCriticalSection(&_cs);
 }
 
@@ -106,6 +131,7 @@ void SpawnZone::SendMonsterSpawn(Monster* monster)
 	bw.Write(monster->GetMonsterId());
 	bw.Write(monster->GetMonsterType());
 	bw.Write(monster->GetPos());
+	bw.Write(monster->GetMonsterHp());
 
 	header->_pktSize = bw.GetWriterSize();
 	header->_type = S2C_MONSTERSPAWN;
@@ -151,7 +177,8 @@ void SpawnZone::AttackedMonster(int32 monsterId, int32 damage)
 	Vector3 monsterPos;
 	int32 _monsterId;
 	int32 monsterType;
-	int32 monsterHp;
+	float monsterHp;
+	State monsterState;
 	EnterCriticalSection(&_cs);
 	
 	attackedMonster = it->second;
@@ -161,6 +188,7 @@ void SpawnZone::AttackedMonster(int32 monsterId, int32 damage)
 	monsterPos = attackedMonster->GetPos();
 	monsterType = attackedMonster->GetMonsterType();
 	monsterHp = attackedMonster->GetMonsterHp();
+	monsterState = attackedMonster->GetState();
 
 	LeaveCriticalSection(&_cs);
 	
@@ -170,9 +198,10 @@ void SpawnZone::AttackedMonster(int32 monsterId, int32 damage)
 	BufferWriter bw(sendBuffer);
 
 	PacketHeader* header = bw.WriteReserve<PacketHeader>();
+	bw.Write(monsterState);
+	bw.Write(monsterType);
 	bw.Write(_monsterId);
 	bw.Write(monsterPos);
-	bw.Write(monsterType);
 	bw.Write(monsterHp);
 	header->_pktSize = bw.GetWriterSize();
 	header->_type = S2C_MONSTERATTACKED;
@@ -222,6 +251,8 @@ void SpawnZone::SendMonsterList(GameSession* session)
 		bw.Write(monster->GetMonsterId());
 		bw.Write(monster->GetMonsterType());
 		bw.Write(monster->GetPos());
+		bw.Write(monster->GetMonsterHp());
+
 	}
 
 	LeaveCriticalSection(&_cs);

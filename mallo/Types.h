@@ -18,7 +18,11 @@ enum MoveType : int32
 enum State : uint16
 {
 	IDLE,
-	MOVE
+	MOVE,
+	ATTACK,
+	ATTACKED,
+	DEATH,
+	STATE_NONE,
 };
 
 enum Dir : uint16
@@ -63,6 +67,7 @@ enum PacketProtocol : __int16
 	C2S_MONSTERATTACKED,
 	S2C_MONSTERATTACKED,
 	S2C_MONSTERDEAD,
+	S2C_MONSTERSYNC,
 };
 
 struct Pos
