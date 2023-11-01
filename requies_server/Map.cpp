@@ -85,6 +85,7 @@ void Map::Reset(GameSession* session)
 	for (auto item : adjacent)
 	{
 		_sectors[item.z][item.x]->SendRemoveList(session);
+		_spawnZone[item.z][item.x]->SendRemoveList(session);
 	}
 }
 

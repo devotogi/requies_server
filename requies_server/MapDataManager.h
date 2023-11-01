@@ -90,6 +90,12 @@ public:
 		if (x > _xSize)
 			return false;
 
+		if (z < 0)
+			return false;
+
+		if (x < 0)
+			return false;
+
 		if (_mapData[z][x] == 1)
 			return false;
 

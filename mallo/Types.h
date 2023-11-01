@@ -23,6 +23,7 @@ enum State : uint16
 	ATTACKED,
 	DEATH,
 	STATE_NONE,
+	COOL_TIME,
 };
 
 enum Dir : uint16
@@ -110,9 +111,9 @@ struct PacketHeader
 
 struct Vector3
 {
-	float x;
-	float y;
-	float z;
+	float x = 0;
+	float y = 0;
+	float z = 0;
 
 	Vector3 operator*(float d)
 	{

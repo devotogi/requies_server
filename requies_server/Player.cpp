@@ -3,6 +3,7 @@
 #include "GameSession.h"
 #include "BufferWriter.h"
 #include "Map.h"
+#include "MapDataManager.h"
 
 Player::Player(GameSession* session, int32 sessionId, const Vector3& pos) : _sessionId(sessionId), _state(State::IDLE), _dir(Dir::NONE), _mouseDir(Dir::NONE), _cameraLocalRotation({ 0,0,0,1 }), _session(session), _prevPos(pos), GameObject(pos)
 {
@@ -73,9 +74,11 @@ void Player::Attacked(int damage)
 void Player::ReSpawn()
 {
 	Map::GetInstance()->Reset(_session);
+	MapDataManager::GetInstnace()->ApplyMapGameObject(this, false);
 
 	EnterCriticalSection(&_cs);
 	_pos = { 67,0,72 };
+	_prevPos = { 67,0,72 };
 	_state = IDLE;
 	_dir = NONE;
 	_mouseDir = NONE;
@@ -110,6 +113,5 @@ void Player::ReSpawn()
 
 	_session->Send(sendBuffer, pktHeader->_pktSize);
 	Map::GetInstance()->Set(_session);
-
-
+	MapDataManager::GetInstnace()->ApplyMapGameObject(this, true);
 }
