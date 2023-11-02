@@ -5,7 +5,8 @@ class Monster : public GameObject
 	enum : int32
 	{
 		ATTACKED_TICK = 600,
-		COOL_TIME_TICK = 1000
+		COOL_TIME_TICK = 1000,
+		MOVE_TICK = 100,
 	};
 
 private:
@@ -21,6 +22,9 @@ private:
 
 	FPS _attackedFps;
 	FPS _coolTimeFps;
+	FPS _moveFps;
+
+	float _speed = 1.5f;
 
 public:
 	Monster(int32 monsterId, MonsterType type, const Vector3& pos);

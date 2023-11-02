@@ -57,9 +57,11 @@ void Monster::Update()
 		break;
 
 	case PATROL:
+		Update_Patrol();
 		break;
 
 	case TRACE:
+		Update_Trace();
 		break;
 	}
 
@@ -113,10 +115,26 @@ void Monster::Update_Attacked()
 
 void Monster::Update_Trace()
 {
-	std::vector<Vector3> path;
-	MapDataManager::GetInstnace()->FindPath(_dir, _pos, path);
+	int32 currentTick = ::GetTickCount64();
 
+	_moveFps.lastTick = (_moveFps.lastTick == 0 ? currentTick : _moveFps.lastTick);
 
+	int32 deltaTick = currentTick - _moveFps.lastTick;
+
+	_moveFps.sumTick += deltaTick;
+
+	_moveFps.lastTick = currentTick;
+
+	if (_coolTimeFps.sumTick < MOVE_TICK)
+		return;
+
+	std::vector<Pos> path;
+	Vector3 playerPos = _target->GetPos();
+	MapDataManager::GetInstnace()->FindPath(playerPos, _pos, path);
+
+	float distance = _speed * _moveFps.sumTick;
+
+	_moveFps.sumTick = 0;
 }
 
 void Monster::Update_Patrol()

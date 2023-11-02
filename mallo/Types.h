@@ -75,16 +75,41 @@ enum PacketProtocol : __int16
 
 struct Pos
 {
-public:
-	int x;
-	int z;
+	int x = 0;
+	int z = 0;
 
-	bool operator==(const Pos& other)
+	Pos operator+(Pos& other)
 	{
-		return x == other.x && z == other.z;
+		Pos ret;
+		ret.x = x + other.x;
+		ret.z = z + other.z;
+
+		return ret;
 	}
 
-	bool operator!=(const Pos& other)
+	Pos operator-(Pos& other)
+	{
+		Pos ret;
+		ret.x = x - other.x;
+		ret.z = z - other.z;
+
+		return ret;
+	}
+
+	Pos& operator+=(Pos& other)
+	{
+		x += other.x;
+		z += other.z;
+
+		return *this;
+	}
+
+	bool operator==(Pos& other)
+	{
+		return z == other.z && x == other.x;
+	}
+
+	bool operator!=(Pos& other)
 	{
 		return !(*this == other);
 	}
@@ -102,8 +127,8 @@ public:
 			return z > other.z;
 		return x > other.x;
 	}
-
 };
+
 
 struct PacketHeader
 {
@@ -157,4 +182,14 @@ public:
 enum MonsterType : int32
 {
 	Bear
+};
+
+struct PQNode
+{
+	bool operator<(const PQNode& other) const { return f < other.f; }
+	bool operator>(const PQNode& other) const { return f > other.f; }
+
+	int f;
+	int g;
+	Pos pos;
 };

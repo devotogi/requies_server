@@ -102,6 +102,26 @@ public:
 		return true;
 	}
 
+	bool CanGo(const Pos& pos)
+	{
+		if (pos.z > _zSize)
+			return false;
+
+		if (pos.x > _xSize)
+			return false;
+
+		if (pos.z < 0)
+			return false;
+
+		if (pos.x < 0)
+			return false;
+
+		if (_mapData[pos.z][pos.x] == 1)
+			return false;
+
+		return true;
+	}
+
 	int32 PopMonsterId() 
 	{
 		int32 ret;
@@ -126,6 +146,6 @@ public:
 		LeaveCriticalSection(&_cs);
 	}
 
-	void FindPath(const Vector3& dest, const Vector3& start, std::vector<Vector3>& path);
+	void FindPath(const Vector3& dest, const Vector3& start, std::vector<Pos>& path);
 };
 
