@@ -47,6 +47,7 @@ public:
 	void SetSMaxSize(int32 maxX, int32 maxZ) { _smaxX = maxX, _smaxZ = maxZ;  }
 
 	std::vector<std::vector<SpawnZone*>>& SpawnZones() { return _spawnZone; }
+	std::vector<std::vector<Sector*>>& GetSector() { return _sectors; }
 	void AttackedMonster(const Vector3& pos, int32 monsterId, int32 damage);
 };
 

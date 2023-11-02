@@ -125,5 +125,7 @@ public:
 		_monsterIds.push(id);
 		LeaveCriticalSection(&_cs);
 	}
+
+	void FindPath(const Vector3& dest, const Vector3& start, std::vector<Vector3>& path);
 };
 

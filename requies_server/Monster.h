@@ -38,11 +38,15 @@ public:
 
 private:
 	void Update_Idel();
-	void Update_Move();
 	void Update_Attack();
 	void Update_Attacked();
+	void Update_Trace();
+	void Update_Patrol();
 	void Update_COOL_TIME();
 	void SyncMonsterPacket();
+
+	void TraceSearch();
+	void AttackSearch();
 
 };
 

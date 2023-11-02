@@ -24,6 +24,8 @@ enum State : uint16
 	DEATH,
 	STATE_NONE,
 	COOL_TIME,
+	PATROL,
+	TRACE,
 };
 
 enum Dir : uint16

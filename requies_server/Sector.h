@@ -14,5 +14,7 @@ public:
 	void BroadCast(GameSession* session, BYTE* sendBuffer, int32 sendSize);
 	void SendPlayerList(GameSession* session);
 	void SendRemoveList(GameSession* session);
+
+	std::set<GameSession*>& GetSessions() { return _sessions; }
 };
 
