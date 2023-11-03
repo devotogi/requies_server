@@ -147,9 +147,24 @@ struct Vector3
 		return { x * d, y * d, z * d };
 	}
 
-	Vector3 operator+(Vector3 d)
+	Vector3 operator+(const Vector3& d)
 	{
 		return { x + d.x, y + d.y, z + d.z };
+	}
+
+	Vector3 operator-(const Vector3& d)
+	{
+		return { x - d.x, y - d.y, z - d.z };
+	}
+
+	float Magnitude() 
+	{
+		return (x * x) + (y * y) + (z * z);
+	}
+
+	Vector3 Normalized() 
+	{
+		return Vector3{ x / Magnitude(), y / Magnitude(), z / Magnitude() };
 	}
 };
 

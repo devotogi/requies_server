@@ -6,6 +6,7 @@
 #include "Sector.h"
 #include "SpawnZone.h"
 #include "MapDataManager.h"
+#include "MonsterManager.h"
 // 자기자신, 위, 오른위, 오른, 오른아래, 아래, 왼아래, 왼, 왼위
 int32 dx[9] = { 0,0,1,1,1,0,-1,-1,-1 };
 int32 dz[9] = { 0,-1,-1,0,1,1,1,0,-1 };
@@ -167,6 +168,8 @@ void Map::Update()
 			_spawnZone[z][x]->Update();
 		}
 	}
+
+	MonsterManager::GetInstnace()->Update();
 }
 
 void Map::AttackedMonster(const Vector3& pos, int32 monsterId, int32 damage)

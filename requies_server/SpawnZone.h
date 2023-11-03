@@ -7,7 +7,6 @@ class SpawnZone
 	enum
 	{
 		SPAWN_TICK = 10000,
-		MONSTERUPDATE_TICK = 20
 	};
 
 private:
@@ -26,10 +25,11 @@ public:
 	void SendMonsterList(GameSession* session);
 	void SendRemoveList(GameSession* session);
 	void AttackedMonster(int32 monsterId, int32 damage);
+
+	bool Exist(int32);
 private:
 	void AddMonster(int32 monsterKey, Monster* monster);
 	void RemoveMonster(int32 monsterKey);
-	void MonsterUpdate();
 	void Spawn();
 	Vector3 RandomSpawnPos();
 	void SendMonsterSpawn(Monster* monster);

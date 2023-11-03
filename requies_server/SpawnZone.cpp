@@ -6,6 +6,7 @@
 #include "BufferReader.h"
 #include "BufferWriter.h"
 #include "GameSession.h"
+#include "MonsterManager.h"
 SpawnZone::SpawnZone(int32 maxSpawnCount, const BoundBox& boundBox, MonsterType monsterType) : _maxSpawnCount(maxSpawnCount), _boundBox(boundBox), _monsterType(monsterType)
 {
 	InitializeCriticalSection(&_cs);
@@ -24,33 +25,13 @@ void SpawnZone::Update()
 	_spawnFps.sumTick += deltaTick;
 
 	_spawnFps.lastTick = currentTick;
-/*
+
 	if (_spawnFps.sumTick < SPAWN_TICK) return;
-	if (_monsterDic.size() >= _maxSpawnCount) return;
 
-	Spawn();
+	if (_monsterDic.size() < _maxSpawnCount)
+		Spawn();
+
 	_spawnFps.sumTick = 0;
-	*/
-	if (_spawnFps.sumTick >= SPAWN_TICK)
-	{
-		if (_monsterDic.size() < _maxSpawnCount) 
-		{
-			Spawn();
-		}
-		_spawnFps.sumTick = 0;
-	}
-
-	int monsterUpdateDeltaTick = currentTick - _monsterUpdateFps.lastTick;
-	_monsterUpdateFps.sumTick += monsterUpdateDeltaTick;
-
-	_monsterUpdateFps.lastTick = currentTick;
-
-
-	if (_monsterUpdateFps.sumTick >= MONSTERUPDATE_TICK)
-	{
-		MonsterUpdate();
-		_monsterUpdateFps.sumTick = 0;
-	}
 }
 
 void SpawnZone::AddMonster(int32 monsterKey, Monster* monster)
@@ -67,18 +48,6 @@ void SpawnZone::RemoveMonster(int32 monsterKey)
 	LeaveCriticalSection(&_cs);
 }
 
-void SpawnZone::MonsterUpdate()
-{
-	EnterCriticalSection(&_cs);
-	for (auto monsterDic : _monsterDic)
-	{
-		int32 monsterId = monsterDic.first;
-		Monster* monster = monsterDic.second;
-
-		monster->Update();
-	}
-	LeaveCriticalSection(&_cs);
-}
 
 void SpawnZone::Spawn()
 {
@@ -91,6 +60,7 @@ void SpawnZone::Spawn()
 		int32 newMonsterId = MapDataManager::GetInstnace()->PopMonsterId();
 		Vector3 monsterPos = RandomSpawnPos();
 		Monster* monster = new Monster(newMonsterId, MonsterType::Bear, monsterPos);
+		MonsterManager::GetInstnace()->AddMonster(monster);
 		AddMonster(newMonsterId, monster);
 		SendMonsterSpawn(monster);
 	}
@@ -212,8 +182,7 @@ void SpawnZone::AttackedMonster(int32 monsterId, int32 damage)
 	RemoveMonster(_monsterId);
 
 	EnterCriticalSection(&_cs);
-	delete attackedMonster;
-
+	MonsterManager::GetInstnace()->RemoveMonster(attackedMonster);
 	MapDataManager::GetInstnace()->PushMonsterId(_monsterId);
 	LeaveCriticalSection(&_cs);
 
@@ -228,6 +197,12 @@ void SpawnZone::AttackedMonster(int32 monsterId, int32 damage)
 		header->_type = S2C_MONSTERDEAD;
 		Map::GetInstance()->BroadCast(monsterPos, sendBuffer, header->_pktSize);
 	}
+}
+
+bool SpawnZone::Exist(int32 monsterId)
+{
+	auto it = _monsterDic.find(monsterId);
+	return it == _monsterDic.end() ? false : true;
 }
 
 void SpawnZone::SendMonsterList(GameSession* session)

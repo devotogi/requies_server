@@ -6,6 +6,7 @@
 #include "Player.h"
 #include "Sector.h"
 #include "GameSession.h"
+#include "SpawnZone.h"
 Monster::Monster(int32 monsterId, MonsterType type, const Vector3& pos) : _monsterId(monsterId), _type(type), _state(STATE_NONE), GameObject(pos)
 {
 }
@@ -132,8 +133,38 @@ void Monster::Update_Trace()
 	Vector3 playerPos = _target->GetPos();
 	MapDataManager::GetInstnace()->FindPath(playerPos, _pos, path);
 
-	float distance = _speed * _moveFps.sumTick;
+	float nx = path[0].x + 0.5f;
+	float nz = path[0].z + 0.5f;
 
+	Vector3 dirVector = _pos - Vector3 {nx, _pos.y, nz};
+	Vector3 dir = dirVector.Normalized();
+
+	float distance = _speed * _moveFps.sumTick;
+	Vector3 nextPos = _pos + (dir * distance);
+	
+	int32 nextX = static_cast<int32>(nextPos.x);
+	int32 nextZ = static_cast<int32>(nextPos.z);
+
+	int32 nowX = static_cast<int32>(_pos.x);
+	int32 nowZ = static_cast<int32>(_pos.z);
+	
+	if (nextX != nowX || nextZ != nowZ) 
+	{
+		// TODO 문제 발생...
+		// 몬스터가 플레이어를 쫒아다니다가, Secotr와 SpawnZone을 넘어가게 되면 문제가 발생함 
+		// 1. 현재SpawnZone에 있는 MonsterDic에서 for문을 돌리고 있는데,몬스터가 이동하면 for문 내에서 MonsterDic을 수정해야함
+		// MonsterList를 하나 빼서 관리를 할까요??? 
+		// 
+		// 2. 몬스터가 플레이어 추적하다가 Sector 단위로 넘어다니면 플레이어처럼 똑같이 처리해줘야 하는건가요?
+		bool moveMonster = Map::GetInstance()->SpawnZones()[nextZ][nextX]->Exist(_monsterId);
+		if (moveMonster)
+		{
+			// 몬스터도 Sector 이동하면 BroadCast를 해야하나요? 
+		}
+	}
+
+	_pos = nextPos;
+	SyncMonsterPacket();
 	_moveFps.sumTick = 0;
 }
 
