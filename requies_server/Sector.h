@@ -1,4 +1,5 @@
 #pragma once
+#include "Monster.h"
 class GameSession;
 class Sector
 {
@@ -14,7 +15,8 @@ public:
 	void BroadCast(GameSession* session, BYTE* sendBuffer, int32 sendSize);
 	void SendPlayerList(GameSession* session);
 	void SendRemoveList(GameSession* session);
-
+	void SendRemoveMonster(Monster* monster, int32 sendSize);
+	void SendNewMonster(Monster* monster, int32 sendSize);
 	std::set<GameSession*>& GetSessions() { return _sessions; }
 };
 

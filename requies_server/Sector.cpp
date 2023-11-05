@@ -3,7 +3,7 @@
 #include "GameSession.h"
 #include "Player.h"
 #include "BufferWriter.h"
-
+#include "Monster.h"
 Sector::Sector()
 {
 	InitializeCriticalSection(&_cs);
@@ -202,4 +202,14 @@ void Sector::SendRemoveList(GameSession* session)
 	}
 
 	LeaveCriticalSection(&_cs);
+}
+
+void Sector::SendRemoveMonster(Monster* monster, int32 sendSize)
+{
+
+}
+
+void Sector::SendNewMonster(Monster* monster, int32 sendSize)
+{
+
 }

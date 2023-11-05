@@ -7,7 +7,7 @@
 #include "BufferWriter.h"
 #include "GameSession.h"
 #include "MonsterManager.h"
-SpawnZone::SpawnZone(int32 maxSpawnCount, const BoundBox& boundBox, MonsterType monsterType) : _maxSpawnCount(maxSpawnCount), _boundBox(boundBox), _monsterType(monsterType)
+SpawnZone::SpawnZone(const Pos& spawnZoneIndex, int32 maxSpawnCount, const BoundBox& boundBox, MonsterType monsterType) : _spawnZoneIndex(spawnZoneIndex), _maxSpawnCount(maxSpawnCount), _boundBox(boundBox), _monsterType(monsterType)
 {
 	InitializeCriticalSection(&_cs);
 }
@@ -38,6 +38,7 @@ void SpawnZone::AddMonster(int32 monsterKey, Monster* monster)
 {
 	EnterCriticalSection(&_cs);
 	_monsterDic.insert({ monsterKey, monster });
+	_spawnCnt++;
 	LeaveCriticalSection(&_cs);
 }
 
@@ -45,6 +46,7 @@ void SpawnZone::RemoveMonster(int32 monsterKey)
 {
 	EnterCriticalSection(&_cs);
 	_monsterDic.erase( monsterKey );
+	_spawnCnt--;
 	LeaveCriticalSection(&_cs);
 }
 
@@ -52,14 +54,17 @@ void SpawnZone::RemoveMonster(int32 monsterKey)
 void SpawnZone::Spawn()
 {
 	// TODO 몬스터 스폰
-	int32 nowMonsterCnt = _monsterDic.size();
-	int32 spawnMonsterCnt = _maxSpawnCount - nowMonsterCnt;
+	EnterCriticalSection(&_cs);
+	int32 spawnCnt = _spawnCnt;
+	LeaveCriticalSection(&_cs);
+
+	int32 spawnMonsterCnt = _maxSpawnCount - spawnCnt;
 
 	for (int32 i = 0; i < spawnMonsterCnt; i++) 
 	{
 		int32 newMonsterId = MapDataManager::GetInstnace()->PopMonsterId();
 		Vector3 monsterPos = RandomSpawnPos();
-		Monster* monster = new Monster(newMonsterId, MonsterType::Bear, monsterPos);
+		Monster* monster = new Monster(_spawnZoneIndex,newMonsterId, MonsterType::Bear, monsterPos);
 		MonsterManager::GetInstnace()->AddMonster(monster);
 		AddMonster(newMonsterId, monster);
 		SendMonsterSpawn(monster);
@@ -108,6 +113,60 @@ void SpawnZone::SendMonsterSpawn(Monster* monster)
 	Map::GetInstance()->BroadCast(monsterV3, sendBuffer, header->_pktSize);
 }
 
+void SpawnZone::Reset(Monster* monster, const Pos& nowPos)
+{
+	EnterCriticalSection(&_cs);
+	
+	int32 monsterId = monster->GetMonsterId();
+	_monsterDic.erase(monsterId);
+
+	LeaveCriticalSection(&_cs);
+	
+	BYTE sendBuffer[256] = {};
+	BufferWriter bw(sendBuffer);
+
+	PacketHeader* header = bw.WriteReserve<PacketHeader>();
+	
+	bw.Write(monster->GetState());
+	bw.Write(monster->GetMonsterId());
+	bw.Write(monster->GetMonsterType());
+	bw.Write(monster->GetPos());
+	bw.Write(monster->GetMonsterHp());
+	bw.Write(monster->GetDir());
+
+	header->_pktSize = bw.GetWriterSize();
+	header->_type = S2C_DELETEMONSTER;
+
+	Map::GetInstance()->BroadCast(nowPos, sendBuffer, header->_pktSize);
+}
+
+void SpawnZone::Set(Monster* monster, const Pos& nowPos)
+{
+	EnterCriticalSection(&_cs);
+
+	int32 monsterId = monster->GetMonsterId();
+	_monsterDic.insert({monsterId,monster });
+
+	LeaveCriticalSection(&_cs);
+
+	BYTE sendBuffer[256] = {};
+	BufferWriter bw(sendBuffer);
+
+	PacketHeader* header = bw.WriteReserve<PacketHeader>();
+
+	bw.Write(monster->GetState());
+	bw.Write(monster->GetMonsterId());
+	bw.Write(monster->GetMonsterType());
+	bw.Write(monster->GetPos());
+	bw.Write(monster->GetMonsterHp());
+	bw.Write(monster->GetDir());
+
+	header->_pktSize = bw.GetWriterSize();
+	header->_type = S2C_NEWMONSTER;
+
+	Map::GetInstance()->BroadCast(nowPos, sendBuffer, header->_pktSize);
+}
+
 void SpawnZone::SendRemoveList(GameSession* session)
 {
 	BYTE sendBuffer[4096] = {};
@@ -148,6 +207,7 @@ void SpawnZone::AttackedMonster(int32 monsterId, int32 damage)
 	int32 monsterType;
 	float monsterHp;
 	State monsterState;
+	Vector3 monsterDir;
 	EnterCriticalSection(&_cs);
 	
 	attackedMonster = it->second;
@@ -158,6 +218,7 @@ void SpawnZone::AttackedMonster(int32 monsterId, int32 damage)
 	monsterType = attackedMonster->GetMonsterType();
 	monsterHp = attackedMonster->GetMonsterHp();
 	monsterState = attackedMonster->GetState();
+	monsterDir = attackedMonster->GetDir();
 
 	LeaveCriticalSection(&_cs);
 	
@@ -172,6 +233,8 @@ void SpawnZone::AttackedMonster(int32 monsterId, int32 damage)
 	bw.Write(_monsterId);
 	bw.Write(monsterPos);
 	bw.Write(monsterHp);
+	bw.Write(monsterDir);
+
 	header->_pktSize = bw.GetWriterSize();
 	header->_type = S2C_MONSTERATTACKED;
 
@@ -179,9 +242,10 @@ void SpawnZone::AttackedMonster(int32 monsterId, int32 damage)
 
 	if (!death) return;
 	
-	RemoveMonster(_monsterId);
+	// RemoveMonster(_monsterId);
 
 	EnterCriticalSection(&_cs);
+	attackedMonster->Dead();
 	MonsterManager::GetInstnace()->RemoveMonster(attackedMonster);
 	MapDataManager::GetInstnace()->PushMonsterId(_monsterId);
 	LeaveCriticalSection(&_cs);
@@ -202,7 +266,7 @@ void SpawnZone::AttackedMonster(int32 monsterId, int32 damage)
 bool SpawnZone::Exist(int32 monsterId)
 {
 	auto it = _monsterDic.find(monsterId);
-	return it == _monsterDic.end() ? false : true;
+	return it != _monsterDic.end() ? true: false;
 }
 
 void SpawnZone::SendMonsterList(GameSession* session)
@@ -226,7 +290,6 @@ void SpawnZone::SendMonsterList(GameSession* session)
 		bw.Write(monster->GetMonsterType());
 		bw.Write(monster->GetPos());
 		bw.Write(monster->GetMonsterHp());
-
 	}
 
 	LeaveCriticalSection(&_cs);

@@ -2,6 +2,7 @@
 class Sector;
 class GameSession;
 class SpawnZone;
+class Monster;
 #define SECTOR_SIZE 32
 #define ADJACENT_COUNT 9
 #define SECTOR_COUNT 8
@@ -42,6 +43,8 @@ public:
 	void MapSyncAdjacentRemoveAndInsert(GameSession* session, const Vector3& prevPos, const Vector3& nowPos);
 	void BroadCast(GameSession* session, BYTE* sendBuffer, int32 sendSize);
 	void BroadCast(const Vector3& pos, BYTE* sendBuffer, int32 sendSize);
+	void BroadCast(const Pos& pos, BYTE* sendBuffer, int32 sendSize);
+	void MonsterSend(const Pos& prevPos, const Pos& pos, BYTE* sendBuffer, int32 sendSize, bool add, Monster* monster);
 	void Update();
 	Vector3 GetStartPos(int32 x, int32 z) { return _startPos[z][x];}
 	void SetSMaxSize(int32 maxX, int32 maxZ) { _smaxX = maxX, _smaxZ = maxZ;  }

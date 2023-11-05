@@ -9,7 +9,7 @@ class MonsterManager
 	};
 
 private:
-	std::set<Monster*> _monsters;
+	std::set<Monster*>    _monsters;
 	CRITICAL_SECTION _cs;
 	FPS _monsterUpdateFps;
 public:

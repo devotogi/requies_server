@@ -7,7 +7,7 @@
 #include "Sector.h"
 #include "GameSession.h"
 #include "SpawnZone.h"
-Monster::Monster(int32 monsterId, MonsterType type, const Vector3& pos) : _monsterId(monsterId), _type(type), _state(STATE_NONE), GameObject(pos)
+Monster::Monster(const Pos& spawnZoneIndex, int32 monsterId, MonsterType type, const Vector3& pos) : _spawnZoneIndex(spawnZoneIndex), _monsterId(monsterId), _type(type), _state(STATE_NONE), GameObject(pos)
 {
 }
 
@@ -70,16 +70,55 @@ void Monster::Update()
 		SyncMonsterPacket();
 }
 
+void Monster::Dead()
+{
+	int32 posZ = static_cast<int32>(_pos.z) / 32;
+	int32 posX = static_cast<int32>(_pos.x) / 32;
+
+	Map::GetInstance()->SpawnZones()[posZ][posX]->RemoveMonster(_monsterId);
+}
+
 void Monster::Update_Idel()
 {
+	int32 currentTick = ::GetTickCount64();
+
+	_searchFps.lastTick = (_searchFps.lastTick == 0 ? currentTick : _searchFps.lastTick);
+
+	int32 deltaTick = currentTick - _attackedFps.lastTick;
+
+	_searchFps.sumTick += deltaTick;
+
+	_searchFps.lastTick = currentTick;
+
+	if (_searchFps.sumTick < SEARCH_TICK)
+		return;
+
+	AttackSearch();
+
+	if (_state == ATTACK)
+	{
+		_searchFps.sumTick = 0;
+		return;
+	}
+
 	TraceSearch();
+
+	if (_state == TRACE)
+	{
+		_searchFps.sumTick = 0;
+		return;
+	}
+
+ 	PatrolSearch();
+
+	_searchFps.sumTick = 0;
 }
 
 void Monster::Update_Attack()
 {
 	std::vector<std::vector<std::set<GameObject*>>>& mapDataGameObejct = MapDataManager::GetInstnace()->MapDataGameObject();
 
-	Vector3 targetPos = _dir;
+	Vector3 targetPos = _target->GetPos();
 
 	int32 x = static_cast<int32>(targetPos.x);
 	int32 z = static_cast<int32>(targetPos.z);
@@ -117,8 +156,7 @@ void Monster::Update_Attacked()
 void Monster::Update_Trace()
 {
 	int32 currentTick = ::GetTickCount64();
-
-	_moveFps.lastTick = (_moveFps.lastTick == 0 ? currentTick : _moveFps.lastTick);
+	const int32 moveTick = MOVE_TICK / _speed;
 
 	int32 deltaTick = currentTick - _moveFps.lastTick;
 
@@ -126,51 +164,164 @@ void Monster::Update_Trace()
 
 	_moveFps.lastTick = currentTick;
 
-	if (_coolTimeFps.sumTick < MOVE_TICK)
+	if (_moveFps.sumTick < moveTick)
 		return;
 
 	std::vector<Pos> path;
 	Vector3 playerPos = _target->GetPos();
 	MapDataManager::GetInstnace()->FindPath(playerPos, _pos, path);
 
+	if (path.size() == 0)
+	{
+		_state = IDLE;
+		_moveFps.sumTick = 0;
+		_moveFps.lastTick = 0;
+		return;
+	}
+
 	float nx = path[0].x + 0.5f;
 	float nz = path[0].z + 0.5f;
 
-	Vector3 dirVector = _pos - Vector3 {nx, _pos.y, nz};
-	Vector3 dir = dirVector.Normalized();
+	float moveDist = _speed * (moveTick / 1000.f);
+	Vector3 dirVector = Vector3{ nx, 0, nz } - _pos;
+	_dir = dirVector.Normalized();
+	float dist = abs(_pos.x - playerPos.x) + abs(_pos.z - playerPos.z);
 
-	float distance = _speed * _moveFps.sumTick;
-	Vector3 nextPos = _pos + (dir * distance);
-	
-	int32 nextX = static_cast<int32>(nextPos.x);
-	int32 nextZ = static_cast<int32>(nextPos.z);
-
-	int32 nowX = static_cast<int32>(_pos.x);
-	int32 nowZ = static_cast<int32>(_pos.z);
-	
-	if (nextX != nowX || nextZ != nowZ) 
+	if (dist >= 20.f)
 	{
-		// TODO 문제 발생...
-		// 몬스터가 플레이어를 쫒아다니다가, Secotr와 SpawnZone을 넘어가게 되면 문제가 발생함 
-		// 1. 현재SpawnZone에 있는 MonsterDic에서 for문을 돌리고 있는데,몬스터가 이동하면 for문 내에서 MonsterDic을 수정해야함
-		// MonsterList를 하나 빼서 관리를 할까요??? 
-		// 
-		// 2. 몬스터가 플레이어 추적하다가 Sector 단위로 넘어다니면 플레이어처럼 똑같이 처리해줘야 하는건가요?
-		bool moveMonster = Map::GetInstance()->SpawnZones()[nextZ][nextX]->Exist(_monsterId);
-		if (moveMonster)
-		{
-			// 몬스터도 Sector 이동하면 BroadCast를 해야하나요? 
-		}
+		_state = IDLE;
+		_moveFps.sumTick = 0;
+		_moveFps.lastTick = 0;
+		return;
 	}
 
-	_pos = nextPos;
-	SyncMonsterPacket();
-	_moveFps.sumTick = 0;
+	if (path.size() == 1)
+	{
+		_state = IDLE;
+		_moveFps.sumTick = 0;
+		_moveFps.lastTick = 0;
+		return;
+	}
+	else
+	{
+		Vector3 nextPos = _pos + (_dir * moveDist);
+
+		int32 nextX = static_cast<int32>(nextPos.x);
+		int32 nextZ = static_cast<int32>(nextPos.z);
+
+		Pos nextPPos = { nextX, nextZ };
+		Pos nowPPos = { _pos.x, _pos.z };
+
+		int32 nowX = static_cast<int32>(_pos.x);
+		int32 nowZ = static_cast<int32>(_pos.z);
+
+		int32 nextZIndex = nextZ / 32;
+		int32 nextXIndex = nextX / 32;
+
+		int32 nowZIndex = nowZ / 32;
+		int32 nowXIndex = nowX / 32;
+
+		if (nextXIndex != nowXIndex || nextZIndex != nowZIndex)
+		{
+			bool moveMonster = Map::GetInstance()->SpawnZones()[nextZIndex][nextXIndex]->Exist(_monsterId);
+			if (moveMonster == false) // 몬스터가 Sector를 이동함
+			{
+				Map::GetInstance()->SpawnZones()[nowZIndex][nowXIndex]->Reset(this, nowPPos);
+				Map::GetInstance()->SpawnZones()[nextZIndex][nextXIndex]->Set(this, nowPPos);
+			}
+		}
+
+		std::cout << _moveFps.sumTick << std::endl;
+		SyncMonsterPacket();
+		_pos = nextPos;
+		_moveFps.sumTick = 0;
+	}
 }
 
 void Monster::Update_Patrol()
 {
+	int32 currentTick = ::GetTickCount64();
+	const int32 moveTick = MOVE_TICK / _speed;
 
+	int32 deltaTick = currentTick - _moveFps.lastTick;
+
+	_moveFps.sumTick += deltaTick;
+
+	_moveFps.lastTick = currentTick;
+
+	if (_moveFps.sumTick < moveTick)
+		return;
+
+	std::vector<Pos> path;
+	Vector3 target = _patrolTarget;
+	MapDataManager::GetInstnace()->FindPath(target, _pos, path);
+
+	float dist = abs(_pos.x - target.x) + abs(_pos.z - target.z);
+
+	if (dist <= 0.5f)
+	{
+		_state = IDLE;
+		_moveFps.sumTick = 0;
+		_moveFps.lastTick = 0;
+		return;
+	}
+
+	if (path.size() == 0)
+	{
+		_state = IDLE;
+		_moveFps.sumTick = 0;
+		_moveFps.lastTick = 0;
+		return;
+	}
+
+	float nx = path[0].x + 0.5f;
+	float nz = path[0].z + 0.5f;
+
+	float moveDist = _speed * (moveTick / 1000.f);
+	Vector3 dirVector = Vector3{ nx, 0, nz } - _pos;
+	_dir = dirVector.Normalized();
+
+	if (path.size() == 1)
+	{
+		_state = IDLE;
+		_moveFps.sumTick = 0;
+		_moveFps.lastTick = 0;
+		return;
+	}
+	else
+	{
+		Vector3 nextPos = _pos + (_dir * moveDist);
+
+		int32 nextX = static_cast<int32>(nextPos.x);
+		int32 nextZ = static_cast<int32>(nextPos.z);
+
+		Pos nextPPos = { nextX, nextZ };
+		Pos nowPPos = { _pos.x, _pos.z };
+
+		int32 nowX = static_cast<int32>(_pos.x);
+		int32 nowZ = static_cast<int32>(_pos.z);
+
+		int32 nextZIndex = nextZ / 32;
+		int32 nextXIndex = nextX / 32;
+
+		int32 nowZIndex = nowZ / 32;
+		int32 nowXIndex = nowX / 32;
+
+		if (nextXIndex != nowXIndex || nextZIndex != nowZIndex)
+		{
+			bool moveMonster = Map::GetInstance()->SpawnZones()[nextZIndex][nextXIndex]->Exist(_monsterId);
+			if (moveMonster == false) // 몬스터가 Sector를 이동함
+			{
+				Map::GetInstance()->SpawnZones()[nowZIndex][nowXIndex]->Reset(this, nowPPos);
+				Map::GetInstance()->SpawnZones()[nextZIndex][nextXIndex]->Set(this, nextPPos);
+			}
+		}
+
+		std::cout << _moveFps.sumTick << std::endl;
+		SyncMonsterPacket();
+		_pos = nextPos;
+		_moveFps.sumTick = 0;
+	}
 }
 
 void Monster::Update_COOL_TIME()
@@ -198,11 +349,15 @@ void Monster::SyncMonsterPacket()
 	if (_state == COOL_TIME)
 		return;
 
+	State state = _state;
+
+	if (_state == PATROL || _state == TRACE)
+		state = MOVE;
+
 	BYTE sendBuffer[1024] = {};
 	BufferWriter bw(sendBuffer);
 	PacketHeader* pktHeader = bw.WriteReserve<PacketHeader>();
 
-	State state = _state;
 	int32 monsterId = _monsterId;
 	Vector3 pos = _pos;
 	float hp = _hp;
@@ -222,22 +377,30 @@ void Monster::SyncMonsterPacket()
 
 void Monster::TraceSearch()
 {
-	Pos pos = Map::GetInstance()->ConvertSectorIndex(_pos);
-	Sector* sc = Map::GetInstance()->GetSector()[pos.z][pos.x];
+	std::vector<Pos> adjacent;
+		 
+	Map::GetInstance()->ConvertSectorIndexAddAdjacentrtSectorIndexAll(_pos, adjacent);
 
-	Vector3 monsterPos = _pos;
-
-	for (auto session : sc->GetSessions())
+	for (auto item : adjacent)
 	{
-		Vector3 playerPos = session->GetPlayer()->GetPos();
-		float dist = abs(monsterPos.x - playerPos.x) + abs(monsterPos.z - playerPos.z);
+		Sector* sc = Map::GetInstance()->GetSector()[item.z][item.x];
+		Vector3 monsterPos = _pos;
 
-		if (dist > 10) continue;
-	
-		_target = session->GetPlayer();
-		_dir = _target->GetPos();
-		_state = TRACE;
-		break;
+		for (auto session : sc->GetSessions())
+		{
+			Vector3 playerPos = session->GetPlayer()->GetPos();
+			float dist = abs(monsterPos.x - playerPos.x) + abs(monsterPos.z - playerPos.z);
+
+			if (dist > 10) continue;
+
+			_target = session->GetPlayer();
+
+			Vector3 dirVector = Vector3{ playerPos.x, _pos.y, playerPos.z } - _pos;
+			_dir = dirVector.Normalized();
+
+			_state = TRACE;
+			return;
+		}
 	}
 }
 
@@ -262,8 +425,34 @@ void Monster::AttackSearch()
 
 		_state = State::ATTACK;
 		auto it = mapDataGameObejct[nz][nx].begin();
-		_dir = (*it)->GetPos();
 		_target = (*it);
 		break;
 	}
+}
+
+void Monster::PatrolSearch()
+{
+	int32 currentTick = ::GetTickCount64();
+
+	_patrolFps.lastTick = (_patrolFps.lastTick == 0 ? currentTick : _patrolFps.lastTick);
+
+	int32 deltaTick = currentTick - _patrolFps.lastTick;
+
+	_patrolFps.sumTick += deltaTick;
+
+	_patrolFps.lastTick = currentTick;
+
+	if (_patrolFps.sumTick < 5000)
+		return;
+
+	int32 x = static_cast<int32>(_pos.x) / 32;
+	int32 z = static_cast<int32>(_pos.z) / 32;
+
+	_patrolTarget = Map::GetInstance()->SpawnZones()[z][x]->RandomSpawnPos();
+
+	_state = State::PATROL;
+	_dir = (_patrolTarget - _pos).Normalized();
+
+	_patrolFps.sumTick = 0;
+	_patrolFps.lastTick = 0;
 }

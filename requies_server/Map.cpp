@@ -7,6 +7,7 @@
 #include "SpawnZone.h"
 #include "MapDataManager.h"
 #include "MonsterManager.h"
+#include "Monster.h"
 // 자기자신, 위, 오른위, 오른, 오른아래, 아래, 왼아래, 왼, 왼위
 int32 dx[9] = { 0,0,1,1,1,0,-1,-1,-1 };
 int32 dz[9] = { 0,-1,-1,0,1,1,1,0,-1 };
@@ -157,6 +158,61 @@ void Map::BroadCast(const Vector3& pos, BYTE* sendBuffer, int32 sendSize)
 	
 	for (auto item : adjacent)
 		_sectors[item.z][item.x]->BroadCast(nullptr, sendBuffer, sendSize);
+}
+
+void Map::BroadCast(const Pos& pos, BYTE* sendBuffer, int32 sendSize)
+{
+	std::vector<Pos> adjacent;
+	ConvertSectorIndexAddAdjacentrtSectorIndexAll(pos, adjacent);
+
+	for (auto item : adjacent)
+		_sectors[item.z][item.x]->BroadCast(nullptr, sendBuffer, sendSize);
+}
+
+void Map::MonsterSend(const Pos& prevPos, const Pos& pos, BYTE* sendBuffer, int32 sendSize, bool add, Monster* monster)
+{
+	std::vector<Pos> prevs;
+	ConvertSectorIndexAddAdjacentrtSectorIndexAll(prevPos, prevs);
+	std::vector<Pos> nows;
+	ConvertSectorIndexAddAdjacentrtSectorIndexAll(pos, nows);
+
+	std::set<Pos> nowSet;
+	for (auto now : nows)
+		nowSet.insert(now);
+
+	std::set<Pos> prevSet;
+	for (auto prev : prevs)
+		prevSet.insert(prev);
+
+	std::vector<Pos>  remove;
+	std::vector<Pos>  adds;
+
+	for (auto prev : prevs)
+	{
+		if (!nowSet.count(prev))
+			remove.push_back(prev);
+	}
+
+	for (auto now : nows)
+	{
+		if (!prevSet.count(now))
+			adds.push_back(now);
+	}
+
+	if (add)
+	{
+		for (auto item : nows)
+		{
+			_sectors[item.z][item.x]->BroadCast(nullptr,sendBuffer, sendSize);
+		}
+	}
+	else
+	{
+		for (auto item : prevs)
+		{
+			_sectors[item.z][item.x]->BroadCast(nullptr,sendBuffer, sendSize);
+		}
+	}
 }
 
 void Map::Update()

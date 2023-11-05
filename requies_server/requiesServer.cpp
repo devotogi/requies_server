@@ -64,7 +64,7 @@ void Init()
 			int32 ex = sx + 32;
 
 			BoundBox bound{ ex,ez,sx,sz, };
-			Map::GetInstance()->SpawnZones()[z][x] = new SpawnZone(1, bound, MonsterType::Bear);
+			Map::GetInstance()->SpawnZones()[z][x] = new SpawnZone({z,x}, 1, bound, MonsterType::Bear);
 		}
 	}
 	
