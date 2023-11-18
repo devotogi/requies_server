@@ -231,7 +231,7 @@ void Monster::Update_Trace()
 			}
 		}
 
-		std::cout << _moveFps.sumTick << std::endl;
+		// std::cout << _moveFps.sumTick << std::endl;
 		SyncMonsterPacket();
 		_pos = nextPos;
 		_moveFps.sumTick = 0;
@@ -317,7 +317,7 @@ void Monster::Update_Patrol()
 			}
 		}
 
-		std::cout << _moveFps.sumTick << std::endl;
+		// std::cout << _moveFps.sumTick << std::endl;
 		SyncMonsterPacket();
 		_pos = nextPos;
 		_moveFps.sumTick = 0;
